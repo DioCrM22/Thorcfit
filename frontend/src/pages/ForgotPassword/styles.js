@@ -117,3 +117,31 @@ export const FooterText = styled.p`
     display: inline-block;
   }
 `;
+
+export const PasswordRules = styled.div`
+  margin-top: 12px;
+  font-size: 14px;
+`;
+
+export const ValidationItem = styled.div`
+  color: ${props => props.$valid ? 'green' : 'red'};
+  font-weight: bold;
+  margin-bottom: 5px;
+`;
+
+export const StrengthMessage = styled.div`
+  margin-top: 10px;
+  color: ${props => props.$strength === 'strong' ? 'green' : 'red'};
+  font-weight: bold;
+`;
+
+export const MessageBox = styled.div`
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+  color: ${props => props.type === 'error' ? '#c00' : 'green'};
+  background: ${props => props.type === 'error' ? '#ffe0e0' : '#e0ffe0'};
+  font-weight: bold;
+  text-align: center;
+`;
+

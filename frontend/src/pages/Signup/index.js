@@ -17,27 +17,19 @@ import {
   AnimatedSpan
 } from "./styles";
 
-const formatName = (name) => {
-  return name
-  .replace(/\s{2,}/g, ' ')  // Remove múltiplos espaços consecutivos
-  .split(' ')
-  .map(word => 
-    word.length > 0 
-      ? word[0].toUpperCase() + word.slice(1).toLowerCase()
-      : ''
-  )
-  .join(' ');
-};
-
 const Signup = () => {
   const { signup } = useAuth();
+  const navigate = useNavigate();
+  
+  // Estados do formulário
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [emailConf, setEmailConf] = useState("");
   const [senha, setSenha] = useState("");
   const [senhaConf, setSenhaConf] = useState("");
   const [error, setError] = useState("");
-  const navigate = useNavigate();
+  
+  // Validações de senha
   const [passwordValidations, setPasswordValidations] = useState({
     length: false,
     uppercase: false,
@@ -46,26 +38,35 @@ const Signup = () => {
     specialChar: false,
   });
 
+  // Formatação do nome
+  const formatName = (name) => {
+    return name
+      .replace(/\s{2,}/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
+  // Handlers de mudança
   const handleNomeChange = (e) => {
-    const rawValue = e.target.value;
-    let formattedValue = formatName(rawValue);
-    setNome(formattedValue);
+    setNome(formatName(e.target.value));
     setError("");
   };
 
   const handleEmailChange = (e) => {
-    setEmail(e.target.value);
+    setEmail(e.target.value.toLowerCase());
     setError("");
   };
 
   const handleEmailConfChange = (e) => {
-    setEmailConf(e.target.value);
+    setEmailConf(e.target.value.toLowerCase());
     setError("");
   };
 
   const handleSenhaChange = (e) => {
-    setSenha(e.target.value);
-    validatePassword(e.target.value);
+    const newPassword = e.target.value;
+    setSenha(newPassword);
+    validatePassword(newPassword);
     setError("");
   };
 
@@ -90,28 +91,33 @@ const Signup = () => {
   const validateNome = (nome) => nome.trim().split(" ").length >= 2;
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
+  // Submit do formulário
   const handleSignup = async () => {
     try {
+      // Validações iniciais
       if (!nome || !email || !emailConf || !senha || !senhaConf) {
         throw new Error("🔔 Preencha todos os campos!");
       }
+
+      // Validações específicas
       if (!validateNome(nome)) throw new Error("👤 Digite nome completo!");
       if (!validateEmail(email)) throw new Error("📧 E-mail inválido!");
       if (email !== emailConf) throw new Error("📧 E-mails não coincidem!");
       if (!validatePassword(senha)) throw new Error("🔒 Senha fraca!");
       if (senha !== senhaConf) throw new Error("🔑 Senhas não conferem!");
 
-      const result = await signup(nome, email, senha);
-    
-      if (result === null) {
-        navigate('/aguardando-confirmacao', { 
-          state: { email: email } 
-        });
+      // Tentativa de cadastro
+      const errorMessage = await signup(nome, email, senha);
+      
+      if (errorMessage) {
+        setError(errorMessage);
       } else {
-        setError(result);
+        alert("✅ Cadastro realizado com sucesso!");
+        navigate('/signin');
       }
+
     } catch (err) {
-      setError(err.message);
+      setError(err.message || "Erro durante o cadastro");
     }
   };
 

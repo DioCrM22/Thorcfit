@@ -146,3 +146,32 @@ export const MessageBox = styled.div`
   }
 `;
 
+export const PasswordRules = styled.div`
+  margin: 10px 0;
+  padding: 15px;
+  background: #f8f9fa;
+  border-radius: 8px;
+  width: 100%;
+  min-height: 120px;
+`;
+
+export const ValidationItem = styled.div`
+  color: ${props => props.$valid ? '#28a745' : '#dc3545'};
+  font-size: 0.8rem;
+  margin: 5px 0;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  transition: color 0.3s ease;
+`;
+
+export const StrengthMessage = styled.div`
+  color: ${props => props.$strength === 'strong' ? '#28a745' : '#dc3545'};
+  font-weight: bold;
+  text-align: center;
+  font-size: 0.9rem;
+  padding: 8px;
+  border-radius: 4px;
+  background: ${props => props.$strength === 'strong' ? '#e8f5e9' : '#ffebee'};
+`;
+

@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import {
@@ -21,17 +22,40 @@ import {
 
 const Signin = () => {
   const { signin } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
   const [error, setError] = useState("");
 
-  const handleLogin = async () => {
+  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setError(""); // Resetar erros anteriores
+
+    // Validação dos campos
     if (!email || !senha) {
-      setError("⚠️ Preencha todos os campos!");
+      setError("⚠️ Preencha todos os campos obrigatórios!");
       return;
     }
-    const res = await signin(email, senha);
-    if (res) setError(res);
+
+    if (!emailRegex.test(email)) {
+      setError("⚠️ Formato de e-mail inválido!");
+      return;
+    }
+
+    if (senha.length < 6) {
+      setError("⚠️ A senha deve ter pelo menos 8 caracteres!");
+      return;
+    }
+
+    const errorMessage = await signin(email, senha);
+    
+    if (errorMessage) {
+      setError(errorMessage);
+    } else {
+      navigate("/home"); // Redirecionamento após login bem-sucedido
+    }
   };
 
   const handleGoogleSignIn = () => {

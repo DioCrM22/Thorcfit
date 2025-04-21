@@ -1,42 +1,93 @@
+// Arquivo: ResetPassword.js
 import React, { useState, useEffect } from 'react';
-import { Link, useParams, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import Input from "../../components/Input";
 import Button from "../../components/Button";
-import { Container, FormBox, LogoIcon, Title, AnimatedSpan, FooterText, MessageBox } from './styles';
+import { useAuth } from "../../hooks/useAuth";
+import { 
+  Container, 
+  FormBox, 
+  LogoIcon, 
+  Title, 
+  AnimatedSpan, 
+  FooterText, 
+  MessageBox,
+  PasswordRules,
+  ValidationItem,
+  StrengthMessage
+} from './styles';
+
+// Código mockado para demonstração (em produção isso deve vir do backend)
+const MOCK_CODE = '123456';
 
 const ResetPassword = () => {
-  const { token } = useParams();
+  const { resetPassword } = useAuth();
+  const location = useLocation();
   const navigate = useNavigate();
-  const [password, setPassword] = useState('');
+  const [code, setCode] = useState('');
+  const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
+  const [email, setEmail] = useState('');
+  const [passwordValidations, setPasswordValidations] = useState({
+    length: false,
+    uppercase: false,
+    lowercase: false,
+    number: false,
+    specialChar: false,
+  });
 
   useEffect(() => {
-    if (!token) navigate('/error');
-  }, [token, navigate]);
+    if (!location.state?.email) {
+      navigate('/forgot-password');
+    }
+    setEmail(location.state.email);
+  }, [location, navigate]);
+
+  const validatePassword = (password) => {
+    const validations = {
+      length: password.length >= 8,
+      uppercase: /[A-Z]/.test(password),
+      lowercase: /[a-z]/.test(password),
+      number: /\d/.test(password),
+      specialChar: /[!@#$%^&*(),.?":{}|<>]/.test(password),
+    };
+    setPasswordValidations(validations);
+    return Object.values(validations).every(v => v);
+  };
+
+  const allValidationsMet = Object.values(passwordValidations).every(v => v);
+  const passwordStrength = allValidationsMet ? 'strong' : 'weak';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setMessage('');
-    
-    if (password !== confirmPassword) {
-      setError('❗ As senhas não coincidem.');
-      return;
-    }
 
     try {
-      const response = await fetch('http://localhost:5000/api/redefinir-senha', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token, newPassword: password }),
-      });
+      // Validação do código
+      if (code !== MOCK_CODE) {
+        throw new Error('❗ Código inválido');
+      }
 
-      if (!response.ok) throw new Error('Falha ao redefinir senha');
+      if (newPassword !== confirmPassword) {
+        throw new Error('❗ As senhas não coincidem');
+      }
 
-      setMessage('✅ Senha redefinida com sucesso!');
-      setTimeout(() => navigate('/signin'), 2000);
+      if (!validatePassword(newPassword)) {
+        throw new Error('❗ Senha não atende aos requisitos');
+      }
+
+      const errorMessage = await resetPassword(email, code, newPassword);
+      
+      if (errorMessage) {
+        throw new Error(errorMessage);
+      }
+
+      alert('✅ Senha redefinida com sucesso!');
+      navigate('/signin');
+      
     } catch (err) {
       setError('❌ ' + (err.message || 'Erro ao redefinir senha'));
     }
@@ -46,21 +97,34 @@ const ResetPassword = () => {
     <Container>
       <FormBox onSubmit={handleSubmit}>
         <LogoIcon>
-            <img src="/assets/images/logo.png" alt="Logo" />
+          <img src="/assets/images/logo.png" alt="Logo" />
         </LogoIcon>
-        <Title>Recuperar <AnimatedSpan>Senha</AnimatedSpan></Title>
+        <Title>Redefinir <AnimatedSpan>Senha</AnimatedSpan></Title>
 
         {message && <MessageBox type="success">{message}</MessageBox>}
         {error && <MessageBox type="error">{error}</MessageBox>}
 
         <Input
+          type="text"
+          placeholder="Código de verificação"
+          emoji="🔑"
+          value={code}
+          onChange={(e) => setCode(e.target.value.replace(/\D/g, ''))}
+          maxLength="6"
+          required
+        />
+
+        <Input
           type="password"
           placeholder="Nova senha"
           emoji="🔒"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
+          value={newPassword}
+          onChange={(e) => {
+            setNewPassword(e.target.value);
+            validatePassword(e.target.value);
+          }}
           required
-          minLength="6"
+          minLength="8"
         />
 
         <Input
@@ -70,12 +134,44 @@ const ResetPassword = () => {
           value={confirmPassword}
           onChange={(e) => setConfirmPassword(e.target.value)}
           required
-          minLength="6"
+          minLength="8"
         />
 
-        <Button type="submit">✅ Redefinir Senha</Button>
+        <PasswordRules>
+          {!allValidationsMet ? (
+            <>
+              <ValidationItem $valid={passwordValidations.length}>
+                {passwordValidations.length ? '✓' : '✖'} Mínimo 8 caracteres
+              </ValidationItem>
+              <ValidationItem $valid={passwordValidations.uppercase}>
+                {passwordValidations.uppercase ? '✓' : '✖'} Letra maiúscula
+              </ValidationItem>
+              <ValidationItem $valid={passwordValidations.lowercase}>
+                {passwordValidations.lowercase ? '✓' : '✖'} Letra minúscula
+              </ValidationItem>
+              <ValidationItem $valid={passwordValidations.number}>
+                {passwordValidations.number ? '✓' : '✖'} Número
+              </ValidationItem>
+              <ValidationItem $valid={passwordValidations.specialChar}>
+                {passwordValidations.specialChar ? '✓' : '✖'} Caractere especial
+              </ValidationItem>
+            </>
+          ) : (
+            <StrengthMessage $strength={passwordStrength}>
+              Senha Forte
+            </StrengthMessage>
+          )}
+        </PasswordRules>
+
+        <Button 
+          type="submit"
+          disabled={!allValidationsMet || newPassword !== confirmPassword}
+        >
+          ✅ Redefinir Senha
+        </Button>
+        
         <FooterText>
-            Lembrou sua senha? <Link to="/signin">Voltar ao Login</Link>
+          Lembrou sua senha? <Link to="/signin">Fazer login</Link>
         </FooterText>
       </FormBox>
     </Container>

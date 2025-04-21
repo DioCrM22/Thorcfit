@@ -5,7 +5,7 @@ import jwt
 import secrets
 import string
 import smtplib
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
@@ -13,9 +13,10 @@ from flask import Flask, request, jsonify, send_from_directory, make_response
 from flask_cors import CORS
 import psycopg2
 import traceback
+import random
+import re
 
-# Carregar variáveis de ambiente
-load_dotenv()
+load_dotenv(encoding='utf-8')
 
 # Configuração da aplicação Flask
 app = Flask(__name__)
@@ -39,20 +40,24 @@ missing_vars = [var for var in required_env_vars if not os.getenv(var)]
 if missing_vars:
     raise EnvironmentError(f"Variáveis faltando no .env: {', '.join(missing_vars)}")
 
-# Configuração do Banco de Dados
+# Só depois defina DB_CONFIG
+print("Variáveis de ambiente carregadas:")
+print("DB_PASS:", os.getenv("DB_PASS"))  # Verifique se há caracteres inválidos
+print("DB_USER:", os.getenv("DB_USER"))
 DB_CONFIG = {
-    "host": os.getenv("DB_HOST", "localhost"),
-    "database": os.getenv("DB_NAME", "db_thorcfit"),
-    "user": os.getenv("DB_USER", "postgres"),
+    "host": os.getenv("DB_HOST"),
+    "database": os.getenv("DB_NAME"),
+    "user": os.getenv("DB_USER"),
     "password": os.getenv("DB_PASS"),
-    "port": int(os.getenv("DB_PORT", 5432))
+    "port": os.getenv("DB_PORT")
 }
 
 # Configurações JWT
-JWT_SECRET = os.getenv("JWT_SECRET")
+JWT_SECRET = os.environ.get("JWT_SECRET")
 JWT_EXPIRATION = int(os.getenv("JWT_EXPIRATION", 3600))  # 1 hora
 
 # Configurações de E-mail
+SMTP_PORT = int(os.getenv("SMTP_PORT", 587))
 EMAIL_CONFIG = {
     "server": os.getenv("SMTP_SERVER", "smtp.gmail.com"),
     "port": int(os.getenv("SMTP_PORT", 587)),
@@ -92,28 +97,26 @@ def check_password(password, hashed_password):
     return bcrypt.checkpw(password.encode('utf-8'), hashed_password.encode('utf-8'))
 
 def generate_jwt(user_id):
-    """Gera token JWT para autenticação"""
     return jwt.encode({
         'sub': user_id,
-        'exp': datetime.utcnow() + timedelta(seconds=JWT_EXPIRATION)
     }, JWT_SECRET, algorithm="HS256")
 
-def send_email(destinatario, assunto, corpo):
-    """Envia e-mail usando SMTP"""
+def send_email(destinatario, assunto, corpo_html):
     msg = MIMEMultipart()
     msg["From"] = EMAIL_CONFIG["sender"]
     msg["To"] = destinatario
     msg["Subject"] = assunto
-    msg.attach(MIMEText(corpo, "plain"))
+    msg.attach(MIMEText(corpo_html, "html"))  # Alterado para HTML
 
     try:
         with smtplib.SMTP(EMAIL_CONFIG["server"], EMAIL_CONFIG["port"]) as server:
+            server.set_debuglevel(1)  # Ativa logs detalhados
             server.starttls()
             server.login(EMAIL_CONFIG["sender"], EMAIL_CONFIG["password"])
             server.send_message(msg)
         return True
     except Exception as e:
-        print(f"Erro ao enviar e-mail: {str(e)}")
+        print(f"Erro SMTP: {e}")  # Logará mensagens de erro completas
         return False
 
 def _build_cors_preflight_response():
@@ -168,37 +171,22 @@ def signup():
         email = data['email'].strip().lower()
         senha = data['senha']
 
+        # Validação de e-mail antes de inserir no banco
+        if not re.match(r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", email):
+            return jsonify({"error": "Formato de e-mail inválido"}), 400
+
         conn = get_db_connection()
         with conn.cursor() as cur:
             cur.execute("SELECT id FROM usuarios WHERE email = %s", (email,))
             if cur.fetchone():
                 return jsonify({"error": "E-mail já cadastrado"}), 409
 
-            token_confirmacao = str(uuid.uuid4())
+            codigo_confirmacao = ''.join(random.choice('0123456789') for _ in range(6)) 
             cur.execute("""
                 INSERT INTO usuarios 
-                (nome, email, senha, confirmacao_token, email_confirmado)
+                (nome, email, senha, confirmacao_code, email_confirmado)
                 VALUES (%s, %s, %s, %s, %s)
-                RETURNING id, nome, email
-            """, (nome, email, hash_password(senha), token_confirmacao, False))
-
-            usuario = cur.fetchone()
-            conn.commit()
-
-            link_confirmacao = f"{FRONTEND_URL}/confirmar-email/{token_confirmacao}"
-            corpo_email = f"""Olá {nome},\n\nClique para confirmar seu e-mail:\n{link_confirmacao}"""
-            
-            if not send_email(email, "Confirme seu e-mail", corpo_email):
-                return jsonify({"error": "Erro ao enviar e-mail de confirmação"}), 500
-
-            return jsonify({
-                "message": "Cadastro realizado! Verifique seu e-mail.",
-                "usuario": {
-                    "id": usuario[0],
-                    "nome": usuario[1],
-                    "email": usuario[2]
-                }
-            }), 201
+            """, (nome, email, hash_password(senha), codigo_confirmacao, True))
 
     except psycopg2.IntegrityError as e:
         conn.rollback()
@@ -245,9 +233,6 @@ def login():
             if not check_password(senha, senha_hash):
                 return jsonify({"error": "Credenciais inválidas"}), 401
 
-            if not email_confirmado:
-                return jsonify({"error": "Confirme seu e-mail antes de fazer login"}), 403
-
             token = generate_jwt(user_id)
             return jsonify({
                 "message": "Login bem-sucedido",
@@ -268,45 +253,41 @@ def login():
         if 'conn' in locals():
             conn.close()
 
-@app.route('/api/confirmar-email/<uuid:token>', methods=['GET'])
-def confirmar_email(token):
+@app.route('/api/validate-token', methods=['GET'])
+def validate_token():
+    token = request.headers.get('Authorization', '').replace('Bearer ', '')
     try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=["HS256"])
+        user_id = payload['sub']
+        
         conn = get_db_connection()
         with conn.cursor() as cur:
-            cur.execute("""
-                UPDATE usuarios 
-                SET email_confirmado = TRUE,
-                    confirmacao_token = NULL
-                WHERE confirmacao_token = %s 
-                RETURNING id, email
-            """, (str(token),))
+            cur.execute("SELECT id, nome, email FROM usuarios WHERE id = %s", (user_id,))
+            usuario = cur.fetchone()
             
-            resultado = cur.fetchone()
-            if not resultado:
-                return jsonify({"error": "Token inválido ou expirado"}), 400
+            if not usuario:
+                return jsonify({"error": "Usuário não encontrado"}), 404
             
-            conn.commit()
             return jsonify({
-                "message": "E-mail confirmado com sucesso!",
                 "usuario": {
-                    "id": resultado[0],
-                    "email": resultado[1]
+                    "id": usuario[0],
+                    "nome": usuario[1],
+                    "email": usuario[2]
                 }
             }), 200
             
+    except jwt.ExpiredSignatureError:
+        return jsonify({"error": "Token expirado"}), 401
     except Exception as e:
-        conn.rollback()
-        print(f"Erro na confirmação de e-mail: {str(e)}")
-        return jsonify({"error": "Erro ao confirmar e-mail"}), 500
-    finally:
-        if 'conn' in locals():
-            conn.close()
+        print(f"Erro na validação do token: {str(e)}")
+        return jsonify({"error": "Token inválido"}), 401
+
 
 @app.route('/api/forgot-password', methods=['POST', 'OPTIONS'])
 def forgot_password():
     if request.method == 'OPTIONS':
         return _build_cors_preflight_response()
-    
+
     try:
         if not request.is_json:
             return jsonify({"error": "Content-Type deve ser application/json"}), 415
@@ -317,33 +298,45 @@ def forgot_password():
 
         conn = get_db_connection()
         with conn.cursor() as cur:
-            reset_token = str(uuid.uuid4())
-            reset_token_expira = datetime.utcnow() + timedelta(hours=1)
+            # Gera código numérico de 6 dígitos
+            reset_code = ''.join(random.choice('0123456789') for _ in range(6))
+            # Expira em 1 hora, sempre em UTC
+            reset_code_expira = datetime.now(timezone.utc) + timedelta(hours=1)
 
+            # Atualiza o código no usuário
             cur.execute("""
                 UPDATE usuarios
-                SET reset_token = %s,
-                    reset_token_expira = %s
+                SET reset_code = %s,
+                    reset_code_expira = %s
                 WHERE email = %s
                 RETURNING id, nome
-            """, (reset_token, reset_token_expira, email))
-            
+            """, (reset_code, reset_code_expira, email))
             usuario = cur.fetchone()
             conn.commit()
 
-            if usuario:  # Só envia e-mail se usuário existir
-                link_reset = f"{FRONTEND_URL}/resetar-senha?token={reset_token}"
-                corpo_email = f"""Clique para redefinir sua senha (válido por 1 hora):\n{link_reset}"""
-                
-                if not send_email(email, "Redefinição de Senha", corpo_email):
+            if usuario:
+                # Envia o e‑mail HTML com o código
+                corpo_html = f"""
+                <html>
+                  <body>
+                    <h3>Redefinição de Senha</h3>
+                    <p>Seu código de verificação é: <strong>{reset_code}</strong></p>
+                    <p>Ele é válido por 1 hora.</p>
+                  </body>
+                </html>
+                """
+                if not send_email(email, "ThorcFit — Código de Redefinição", corpo_html):
                     return jsonify({"error": "Erro ao enviar e-mail"}), 500
 
-            return jsonify({"message": "Se o e-mail existir, um link de recuperação será enviado"}), 200
+        # Por segurança, sempre devolve a mesma mensagem
+        return jsonify({"message": "Se o e‑mail existir, um código foi enviado"}), 200
 
     except Exception as e:
-        conn.rollback()
-        print(f"Erro na recuperação de senha: {str(e)}")
+        if 'conn' in locals():
+            conn.rollback()
+        print(f"[forgot-password] {e}")
         return jsonify({"error": "Erro interno no servidor"}), 500
+
     finally:
         if 'conn' in locals():
             conn.close()
@@ -352,52 +345,56 @@ def forgot_password():
 def reset_password():
     if request.method == 'OPTIONS':
         return _build_cors_preflight_response()
-    
+
+    data = request.get_json() or {}
+    email       = data.get('email', '').lower().strip()
+    code        = data.get('code', '').strip()
+    new_passwd  = data.get('newPassword', '')
+
+    # Verifica campos obrigatórios
+    if not email or not code or not new_passwd:
+        return jsonify({"error": "Campos email, code e newPassword são obrigatórios"}), 400
+
+    conn = get_db_connection()
     try:
-        if not request.is_json:
-            return jsonify({"error": "Content-Type deve ser application/json"}), 415
-
-        data = request.get_json()
-        required_fields = ["token", "nova_senha", "confirmacao_senha"]
-        
-        if not all(field in data for field in required_fields):
-            return jsonify({"error": "Campos obrigatórios faltando"}), 400
-
-        if data['nova_senha'] != data['confirmacao_senha']:
-            return jsonify({"error": "As senhas não coincidem"}), 400
-
-        conn = get_db_connection()
         with conn.cursor() as cur:
+            # Busca o usuário que tenha o mesmo code válido e não expirado
             cur.execute("""
-                SELECT id 
-                FROM usuarios 
-                WHERE reset_token = %s
-                AND reset_token_expira > NOW()
-            """, (data['token'],))
-            
-            usuario = cur.fetchone()
-            if not usuario:
-                return jsonify({"error": "Token inválido ou expirado"}), 400
+                SELECT id, reset_code_expira
+                  FROM usuarios
+                 WHERE email = %s
+                   AND reset_code = %s
+            """, (email, code))
+            row = cur.fetchone()
 
-            nova_senha_hash = hash_password(data['nova_senha'])
+            if not row:
+                return jsonify({"error": "Código inválido"}), 400
+
+            user_id, expira = row
+            # Verifica expiração (em UTC)
+            if expira < datetime.now(timezone.utc):
+                return jsonify({"error": "Código expirado"}), 400
+
+            # Tudo ok, atualiza a senha e limpa o código
+            nova_hash = hash_password(new_passwd)
             cur.execute("""
                 UPDATE usuarios
-                SET senha = %s,
-                    reset_token = NULL,
-                    reset_token_expira = NULL
-                WHERE id = %s
-            """, (nova_senha_hash, usuario[0]))
-            
+                   SET senha             = %s,
+                       reset_code        = NULL,
+                       reset_code_expira = NULL
+                 WHERE id = %s
+            """, (nova_hash, user_id))
             conn.commit()
-            return jsonify({"message": "Senha redefinida com sucesso!"}), 200
+
+        return jsonify({"message": "Senha redefinida com sucesso!"}), 200
 
     except Exception as e:
         conn.rollback()
-        print(f"Erro na redefinição de senha: {str(e)}")
+        print(f"[reset-password] {e}")
         return jsonify({"error": "Erro interno no servidor"}), 500
+
     finally:
-        if 'conn' in locals():
-            conn.close()
+        conn.close()
 
 # ======================================
 # INICIALIZAÇÃO

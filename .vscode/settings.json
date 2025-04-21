@@ -1,14 +1,23 @@
 {
+    // Configurações do SQLTools para PostgreSQL
     "sqltools.connections": [
-        {
-            "previewLimit": 50,
-            "server": "localhost",
-            "port": 5432,
-            "driver": "PostgreSQL",
-            "name": "Development",
-            "group": "admin",
-            "database": "db_thorcfit",
-            "username": "postgres"
-        }
-    ]
-}
+      {
+        "previewLimit": 50,
+        "server": "localhost",
+        "port": 5432,
+        "driver": "PostgreSQL",
+        "name": "Development",
+        "group": "admin",
+        "database": "db_thorcfit",
+        "username": "postgres"
+      }
+    ],
+  
+    // Configurações de Encoding UTF-8 (adicione estas linhas!)
+    "files.encoding": "utf8",
+    "files.autoGuessEncoding": true,
+    "[html]": { "files.encoding": "utf8" },
+    "[css]": { "files.encoding": "utf8" },
+    "[javascript]": { "files.encoding": "utf8" },
+    "[json]": { "files.encoding": "utf8" }
+  }

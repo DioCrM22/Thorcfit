@@ -18,21 +18,7 @@ export const AuthProvider = ({ children }) => {
   }, [navigate]);
 
   useEffect(() => {
-    const checkAuth = async () => {
-      const token = localStorage.getItem("authToken");
-      if (token) {
-        try {
-          const response = await axios.get(`${process.env.REACT_APP_API_URL}/api/validate-token`, {
-            headers: { Authorization: `Bearer ${token}` }
-          });
-          setUser(response.data.usuario);
-        } catch (error) {
-          logout();
-        }
-      }
-    };
-    checkAuth();
-  }, [logout]);
+    }, []);
 
   const signin = async (email, senha) => {
     try {
@@ -41,58 +27,64 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, senha }),
       });
-
+  
       const data = await response.json();
-
+  
       if (!response.ok) {
-        return data.error || "Credenciais inválidas ou erro desconhecido";
+        return data.error || "Credenciais inválidas";
       }
-
-      if (!data.usuario?.email_confirmado) {
-        return "Confirme seu e-mail antes de fazer login";
-      }
-
+  
       if (data.token) {
         localStorage.setItem("authToken", data.token);
         axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
+        setUser({
+          id: data.usuario.id,
+          nome: data.usuario.nome,
+          email: data.usuario.email,
+        });
       }
-
-      setUser({
-        id: data.usuario.id,
-        nome: data.usuario.nome,
-        email: data.usuario.email,
-        emailConfirmado: data.usuario.email_confirmado
-      });
-
+  
       return null;
-
+  
     } catch (err) {
-      console.error("Erro no login:", err);
-      return err.message || "Erro interno durante o login";
+      return "Erro ao conectar ao servidor";
     }
   };
 
   const signup = async (nome, email, senha) => {
     try {
-      const response = await fetch("http://localhost:5000/api/signup", {
+      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/signup`, {
         method: "POST",
         headers: {
-          "Content-Type": "application/json",
+          "Content-Type": "application/json; charset=UTF-8",
           "X-Requested-With": "XMLHttpRequest"
         },
         body: JSON.stringify({ nome, email, senha }),
         credentials: 'include' // Importante para cookies/sessões
       });
-  
+      
+      const data = await response.json();
+
       if (!response.ok) {
-        const errorData = await response.json();
-        return errorData.error || "Erro ao cadastrar";
+        return data.message || data.error || "Erro ao cadastrar";
       }
   
       return null;
     } catch (err) {
       console.error("Erro no signup:", err);
-      return "Erro de conexão com o servidor";
+      return err.message || "Erro de conexão com o servidor";
+    }
+  };
+
+  const validateResetCode = async (email, code) => {
+    try {
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/validate-reset-code`,
+        { email, code }
+      );
+      return response.data;
+    } catch (err) {
+      return { valid: false, error: err.response?.data?.error || "Erro na validação" };
     }
   };
 
@@ -117,37 +109,26 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const resetPassword = async (token, novaSenha, confirmacaoSenha) => {
+  const resetPassword = async (email, code, newPassword) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/reset-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ 
-          token,
-          nova_senha: novaSenha,
-          confirmacao_senha: confirmacaoSenha 
-        }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return data.error || "Erro ao redefinir senha";
-      }
-
-      return null;
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/reset-password`,
+        { email, code, newPassword }
+      );
+      return response.data;
     } catch (err) {
-      console.error("Erro no resetPassword:", err);
-      return "Erro de conexão com o servidor";
+      return { error: err.response?.data?.error || "Erro ao redefinir senha" };
     }
   };
-
+  
+  // Atualize o provider
   return (
     <AuthContext.Provider value={{ 
       user,
       signin,
       signup,
       forgotPassword,
+      validateResetCode, // Adicione esta linha
       resetPassword,
       logout
     }}>
