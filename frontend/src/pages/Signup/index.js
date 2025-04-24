@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { Link,  useNavigate} from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
+import { useNotification } from '../../contexts/NotificationContext';
 import Input from "../../components/Input";
 import Button from "../../components/Button";
 import {
@@ -20,8 +21,7 @@ import {
 const Signup = () => {
   const { signup } = useAuth();
   const navigate = useNavigate();
-  
-  // Estados do formulário
+  const { notify } = useNotification();
   const [nome, setNome] = useState("");
   const [email, setEmail] = useState("");
   const [emailConf, setEmailConf] = useState("");
@@ -93,31 +93,31 @@ const Signup = () => {
 
   // Submit do formulário
   const handleSignup = async () => {
+    if (!nome || !email || !emailConf || !senha || !senhaConf) {
+      notify('Preencha todos os campos!', 'error');
+      return;
+    }
+
+    if (!validateNome(nome)) {
+      notify("👤 Digite nome completo!", "error");
+      return;
+    }
+    
+    if (!validateEmail(email)) {
+      notify("📧 E-mail inválido!", "error");
+      return;
+    }
+
     try {
-      // Validações iniciais
-      if (!nome || !email || !emailConf || !senha || !senhaConf) {
-        throw new Error("🔔 Preencha todos os campos!");
-      }
-
-      // Validações específicas
-      if (!validateNome(nome)) throw new Error("👤 Digite nome completo!");
-      if (!validateEmail(email)) throw new Error("📧 E-mail inválido!");
-      if (email !== emailConf) throw new Error("📧 E-mails não coincidem!");
-      if (!validatePassword(senha)) throw new Error("🔒 Senha fraca!");
-      if (senha !== senhaConf) throw new Error("🔑 Senhas não conferem!");
-
-      // Tentativa de cadastro
       const errorMessage = await signup(nome, email, senha);
-      
       if (errorMessage) {
-        setError(errorMessage);
+        notify(errorMessage, 'error');
       } else {
-        alert("✅ Cadastro realizado com sucesso!");
+        notify('Cadastro realizado com sucesso!', 'success');
         navigate('/signin');
       }
-
-    } catch (err) {
-      setError(err.message || "Erro durante o cadastro");
+    } catch (error) {
+      notify('Erro durante o cadastro', 'error');
     }
   };
 
@@ -204,7 +204,7 @@ const Signup = () => {
         <Button onClick={handleSignup}>🚀 Cadastrar Agora</Button>
 
         <FooterText>
-          Já tem conta? <Link to="/signin">Faça Login ➡️</Link>
+          Já tem conta? <Link to="/">Faça Login ➡️</Link>
         </FooterText>
       </FormBox>
     </Container>

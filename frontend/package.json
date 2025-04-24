@@ -5,6 +5,7 @@
   "dependencies": {
     "@emailjs/browser": "^4.4.1",
     "@emoji-mart/react": "^1.1.1",
+    "@react-oauth/google": "^0.12.1",
     "@svgr/webpack": "^8.1.0",
     "ajv": "^8.12.0",
     "ajv-keywords": "^5.1.0",
@@ -15,6 +16,7 @@
     "react-icons": "^5.5.0",
     "react-router-dom": "6.14",
     "react-scripts": "^5.0.1",
+    "react-toastify": "^11.0.5",
     "styled-components": "^5.3.11",
     "svgo": "^3.3.2",
     "web-vitals": "^2.1.0"

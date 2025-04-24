@@ -1,19 +1,23 @@
-import React from "react";
+// src/index.js
+import React from 'react';
 import { createRoot } from 'react-dom/client';
-import App from "./App";
-import { BrowserRouter } from "react-router-dom";
-import { AuthProvider } from "./hooks/useAuth";
-import "bootstrap/dist/css/bootstrap.min.css";
+import { BrowserRouter } from 'react-router-dom';
+import { GoogleOAuthProvider } from '@react-oauth/google';
+import { NotificationProvider } from './contexts/NotificationContext';
+import { AuthProvider } from './hooks/useAuth';
+import App from './App';
 
 const container = document.getElementById('root');
 const root = createRoot(container);
 
 root.render(
-  <React.StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-      </AuthProvider>
-    </BrowserRouter>
-  </React.StrictMode>
-);
+    <NotificationProvider>
+      <BrowserRouter>
+        <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_CLIENT_ID}>
+          <AuthProvider>
+            <App />
+          </AuthProvider>
+        </GoogleOAuthProvider>
+      </BrowserRouter>
+    </NotificationProvider>
+  );

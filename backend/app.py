@@ -5,18 +5,27 @@ import jwt
 import secrets
 import string
 import smtplib
+import requests 
+import traceback
+import random
+import re
+import socket
+import ssl
+
+
 from datetime import datetime, timedelta, timezone
-from dotenv import load_dotenv
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from flask import Flask, request, jsonify, send_from_directory, make_response
 from flask_cors import CORS
+from google.oauth2 import id_token
+from google.auth.transport import requests as grequests
+from dotenv import load_dotenv, find_dotenv
+from tenacity import retry, stop_after_attempt, wait_exponential
 import psycopg2
-import traceback
-import random
-import re
 
-load_dotenv(encoding='utf-8')
+load_dotenv(find_dotenv(), override=True, encoding='utf-8')
+print("CARREGOU GOOGLE_CLIENT_ID:", os.getenv("GOOGLE_CLIENT_ID"))
 
 # Configuração da aplicação Flask
 app = Flask(__name__)
@@ -99,32 +108,24 @@ def check_password(password, hashed_password):
 def generate_jwt(user_id):
     return jwt.encode({
         'sub': user_id,
-    }, JWT_SECRET, algorithm="HS256")
+        'exp': datetime.utcnow() + timedelta(seconds=JWT_EXPIRATION)
+    }, JWT_SECRET, algorithm="HS256")  # Adicione expiração
 
-def send_email(destinatario, assunto, corpo_html):
-    msg = MIMEMultipart()
-    msg["From"] = EMAIL_CONFIG["sender"]
-    msg["To"] = destinatario
-    msg["Subject"] = assunto
-    msg.attach(MIMEText(corpo_html, "html"))  # Alterado para HTML
-
-    try:
-        with smtplib.SMTP(EMAIL_CONFIG["server"], EMAIL_CONFIG["port"]) as server:
-            server.set_debuglevel(1)  # Ativa logs detalhados
-            server.starttls()
-            server.login(EMAIL_CONFIG["sender"], EMAIL_CONFIG["password"])
-            server.send_message(msg)
-        return True
-    except Exception as e:
-        print(f"Erro SMTP: {e}")  # Logará mensagens de erro completas
-        return False
+@app.after_request
+def apply_cors_headers(response):
+    response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Headers"] = "*"  # Permite todos os headers
+    response.headers["Access-Control-Allow-Methods"] = "*"  # Permite todos os métodos
+    return response
 
 def _build_cors_preflight_response():
     response = make_response()
-    response.headers.add("Access-Control-Allow-Origin", os.getenv("FRONTEND_URL", "http://localhost:3000"))
-    response.headers.add("Access-Control-Allow-Headers", "Content-Type, Authorization")
-    response.headers.add("Access-Control-Allow-Methods", "POST, OPTIONS")
-    response.headers.add("Access-Control-Max-Age", "86400")
+    response.headers["Access-Control-Allow-Origin"] = "http://localhost:3000"
+    response.headers["Access-Control-Allow-Credentials"] = "true"
+    response.headers["Access-Control-Allow-Headers"] = "*"
+    response.headers["Access-Control-Allow-Methods"] = "*"
+    response.status_code = 200
     return response
 
 # ======================================
@@ -140,7 +141,8 @@ def index():
             "cadastro": "/api/signup (POST)",
             "confirmar_email": "/api/confirmar-email/<token> (GET)",
             "forgot_password": "/api/forgot-password (POST)",
-            "reset_password": "/api/reset-password (POST)"
+            "reset_password": "/api/reset-password (POST)",
+            "google_auth": "/api/auth/google (POST)"
         }
     }), 200
 
@@ -187,6 +189,9 @@ def signup():
                 (nome, email, senha, confirmacao_code, email_confirmado)
                 VALUES (%s, %s, %s, %s, %s)
             """, (nome, email, hash_password(senha), codigo_confirmacao, True))
+
+            conn.commit()
+            return jsonify({"message": "Usuário cadastrado com sucesso!"}), 201
 
     except psycopg2.IntegrityError as e:
         conn.rollback()
@@ -253,6 +258,89 @@ def login():
         if 'conn' in locals():
             conn.close()
 
+@app.route('/api/auth/google', methods=['POST', 'OPTIONS'])
+def google_auth():
+    if request.method == 'OPTIONS':
+        return _build_cors_preflight_response()
+
+    try:
+        data = request.get_json()
+        print("📥 RECEBIDO em /api/auth/google:", data)
+        token = data.get('token')
+        if not token:
+            print("⚠️ token ausente ou vazio!")
+            return jsonify({"error": "Token do Google não fornecido"}), 400
+
+        # 1) Usa o access_token para buscar os dados do usuário
+        userinfo_resp = requests.get(
+            'https://www.googleapis.com/oauth2/v3/userinfo',
+            headers={'Authorization': f'Bearer {token}'}
+        )
+        if not userinfo_resp.ok:
+            return jsonify({"error": "Token do Google inválido"}), 401
+
+        id_info = userinfo_resp.json()
+
+        # 2) Verifica se o e-mail passou no check do Google
+        if not id_info.get('email_verified'):
+            return jsonify({"error": "E-mail não verificado pelo Google"}), 401
+
+        # 3) Conecta ao DB e cria/atualiza usuário
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            cur.execute("""
+                SELECT id, nome, email, avatar 
+                FROM usuarios 
+                WHERE google_id = %s OR email = %s
+            """, (id_info['sub'], id_info['email']))
+            usuario = cur.fetchone()
+
+            if not usuario:
+                senha_fake = bcrypt.hashpw(secrets.token_bytes(16), bcrypt.gensalt()).decode('utf-8')
+
+                cur.execute("""
+                    INSERT INTO usuarios 
+                    (nome, email, senha, google_id, avatar, email_confirmado)
+                    VALUES (%s, %s, %s, %s, %s, %s)
+                    RETURNING id
+                """, (
+                    id_info.get('name'),
+                    id_info['email'],
+                    senha_fake,
+                    id_info['sub'],
+                    id_info.get('picture'),
+                    True
+                ))
+                user_id = cur.fetchone()[0]
+                conn.commit()
+            else:
+                user_id = usuario[0]
+
+        # 4) Gera JWT da sua aplicação
+        token_app = generate_jwt(user_id)
+        return jsonify({
+            "message": "Login bem-sucedido",
+            "token": token_app,
+            "expires_in": JWT_EXPIRATION,
+            "token_type": "Bearer",
+            "usuario": {
+                "id": user_id,
+                "nome": usuario[1] if usuario else id_info.get('name'),
+                "email": id_info['email'],
+                "avatar": usuario[3] if usuario else id_info.get('picture')
+            }
+        }), 200
+
+    except Exception as e:
+        print(f"Erro no login Google: {str(e)}")
+        traceback.print_exc()
+        return jsonify({"error": "Erro interno no servidor"}), 500
+
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+
 @app.route('/api/validate-token', methods=['GET'])
 def validate_token():
     token = request.headers.get('Authorization', '').replace('Bearer ', '')
@@ -283,118 +371,94 @@ def validate_token():
         return jsonify({"error": "Token inválido"}), 401
 
 
-@app.route('/api/forgot-password', methods=['POST', 'OPTIONS'])
+# Modifique a rota /api/forgot-password
+@app.route('/api/forgot-password', methods=['POST'])
 def forgot_password():
-    if request.method == 'OPTIONS':
-        return _build_cors_preflight_response()
-
     try:
-        if not request.is_json:
-            return jsonify({"error": "Content-Type deve ser application/json"}), 415
-
         email = request.json.get('email', '').lower().strip()
         if not email:
             return jsonify({"error": "E-mail é obrigatório"}), 400
 
         conn = get_db_connection()
         with conn.cursor() as cur:
-            # Gera código numérico de 6 dígitos
-            reset_code = ''.join(random.choice('0123456789') for _ in range(6))
-            # Expira em 1 hora, sempre em UTC
-            reset_code_expira = datetime.now(timezone.utc) + timedelta(hours=1)
+            cur.execute("SELECT id FROM usuarios WHERE email = %s", (email,))
+            usuario = cur.fetchone()
+            
+            if not usuario:
+                return jsonify({"error": "Email não localizado no sistema"}), 404  
+    
+            return jsonify({"message": "Popup de redefinição liberado"}), 200
 
-            # Atualiza o código no usuário
+    except Exception as e:
+        print(f"Erro em forgot-password: {traceback.format_exc()}")
+        return jsonify({"error": "Erro interno no servidor"}), 500
+    finally:
+        if 'conn' in locals():
+            conn.close()
+
+# Modifique a rota /api/reset-password (remova a validação do código)
+@app.route('/api/reset-password', methods=['POST'])
+def reset_password():
+    try:
+        data = request.get_json()
+        email = data.get('email', '').lower().strip()
+        new_password = data.get('newPassword', '')
+
+        if not all([email, new_password]):
+            return jsonify({"error": "Todos os campos são obrigatórios"}), 400
+
+        conn = get_db_connection()
+        with conn.cursor() as cur:
+            # Busca a senha atual
+            cur.execute("SELECT senha FROM usuarios WHERE email = %s", (email,))
+            result = cur.fetchone()
+            
+            if not result:
+                return jsonify({"error": "E-mail não encontrado"}), 404
+                
+            senha_atual = result[0]
+            
+            # Verificação de senha anterior
+            if check_password(new_password, senha_atual):
+                return jsonify({"error": "A nova senha não pode ser igual à anterior"}), 400
+
+            # Validações de força da senha
+            erros = []
+            if len(new_password) < 8:
+                erros.append("Mínimo 8 caracteres")
+            if not re.search(r"[A-Z]", new_password):
+                erros.append("Ao menos 1 letra maiúscula")
+            if not re.search(r"[a-z]", new_password):
+                erros.append("Ao menos 1 letra minúscula")
+            if not re.search(r"[0-9]", new_password):
+                erros.append("Ao menos 1 número")
+            if not re.search(r'[!@#$%^&*(),.?":{}|<>]', new_password):
+                erros.append("Ao menos 1 caractere especial")
+
+            if erros:
+                return jsonify({"error": ". ".join(erros)}), 400
+
+            # Atualiza a senha
+            hashed_password = hash_password(new_password)
             cur.execute("""
                 UPDATE usuarios
-                SET reset_code = %s,
-                    reset_code_expira = %s
+                SET senha = %s
                 WHERE email = %s
-                RETURNING id, nome
-            """, (reset_code, reset_code_expira, email))
-            usuario = cur.fetchone()
+            """, (hashed_password, email))
             conn.commit()
 
-            if usuario:
-                # Envia o e‑mail HTML com o código
-                corpo_html = f"""
-                <html>
-                  <body>
-                    <h3>Redefinição de Senha</h3>
-                    <p>Seu código de verificação é: <strong>{reset_code}</strong></p>
-                    <p>Ele é válido por 1 hora.</p>
-                  </body>
-                </html>
-                """
-                if not send_email(email, "ThorcFit — Código de Redefinição", corpo_html):
-                    return jsonify({"error": "Erro ao enviar e-mail"}), 500
-
-        # Por segurança, sempre devolve a mesma mensagem
-        return jsonify({"message": "Se o e‑mail existir, um código foi enviado"}), 200
+        return jsonify({"message": "Senha redefinida com sucesso!"}), 200
 
     except Exception as e:
         if 'conn' in locals():
             conn.rollback()
-        print(f"[forgot-password] {e}")
+        print(f"[reset-password] Erro: {str(e)}")
         return jsonify({"error": "Erro interno no servidor"}), 500
 
     finally:
         if 'conn' in locals():
             conn.close()
 
-@app.route('/api/reset-password', methods=['POST', 'OPTIONS'])
-def reset_password():
-    if request.method == 'OPTIONS':
-        return _build_cors_preflight_response()
-
-    data = request.get_json() or {}
-    email       = data.get('email', '').lower().strip()
-    code        = data.get('code', '').strip()
-    new_passwd  = data.get('newPassword', '')
-
-    # Verifica campos obrigatórios
-    if not email or not code or not new_passwd:
-        return jsonify({"error": "Campos email, code e newPassword são obrigatórios"}), 400
-
-    conn = get_db_connection()
-    try:
-        with conn.cursor() as cur:
-            # Busca o usuário que tenha o mesmo code válido e não expirado
-            cur.execute("""
-                SELECT id, reset_code_expira
-                  FROM usuarios
-                 WHERE email = %s
-                   AND reset_code = %s
-            """, (email, code))
-            row = cur.fetchone()
-
-            if not row:
-                return jsonify({"error": "Código inválido"}), 400
-
-            user_id, expira = row
-            # Verifica expiração (em UTC)
-            if expira < datetime.now(timezone.utc):
-                return jsonify({"error": "Código expirado"}), 400
-
-            # Tudo ok, atualiza a senha e limpa o código
-            nova_hash = hash_password(new_passwd)
-            cur.execute("""
-                UPDATE usuarios
-                   SET senha             = %s,
-                       reset_code        = NULL,
-                       reset_code_expira = NULL
-                 WHERE id = %s
-            """, (nova_hash, user_id))
-            conn.commit()
-
-        return jsonify({"message": "Senha redefinida com sucesso!"}), 200
-
-    except Exception as e:
-        conn.rollback()
-        print(f"[reset-password] {e}")
-        return jsonify({"error": "Erro interno no servidor"}), 500
-
-    finally:
-        conn.close()
 
 # ======================================
 # INICIALIZAÇÃO

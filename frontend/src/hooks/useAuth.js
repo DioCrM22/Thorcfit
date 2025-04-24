@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
 
-  // Declaração única da função logout
+  // Logout
   const logout = useCallback(() => {
     localStorage.removeItem("authToken");
     delete axios.defaults.headers.common["Authorization"];
@@ -18,8 +18,10 @@ export const AuthProvider = ({ children }) => {
   }, [navigate]);
 
   useEffect(() => {
-    }, []);
+    // Lógica de persistência de login pode ser adicionada aqui
+  }, []);
 
+  // Login tradicional
   const signin = async (email, senha) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/login`, {
@@ -27,13 +29,13 @@ export const AuthProvider = ({ children }) => {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, senha }),
       });
-  
+
       const data = await response.json();
-  
+
       if (!response.ok) {
         return data.error || "Credenciais inválidas";
       }
-  
+
       if (data.token) {
         localStorage.setItem("authToken", data.token);
         axios.defaults.headers.common["Authorization"] = `Bearer ${data.token}`;
@@ -43,14 +45,15 @@ export const AuthProvider = ({ children }) => {
           email: data.usuario.email,
         });
       }
-  
+
       return null;
-  
+
     } catch (err) {
       return "Erro ao conectar ao servidor";
     }
   };
 
+  // Cadastro
   const signup = async (nome, email, senha) => {
     try {
       const response = await fetch(`${process.env.REACT_APP_API_URL}/api/signup`, {
@@ -60,7 +63,7 @@ export const AuthProvider = ({ children }) => {
           "X-Requested-With": "XMLHttpRequest"
         },
         body: JSON.stringify({ nome, email, senha }),
-        credentials: 'include' // Importante para cookies/sessões
+        credentials: 'include'
       });
       
       const data = await response.json();
@@ -68,7 +71,7 @@ export const AuthProvider = ({ children }) => {
       if (!response.ok) {
         return data.message || data.error || "Erro ao cadastrar";
       }
-  
+
       return null;
     } catch (err) {
       console.error("Erro no signup:", err);
@@ -76,6 +79,7 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Validação de código de reset
   const validateResetCode = async (email, code) => {
     try {
       const response = await axios.post(
@@ -88,47 +92,53 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  // Esqueci a senha
   const forgotPassword = async (email) => {
     try {
-      const response = await fetch(`${process.env.REACT_APP_API_URL}/api/forgot-password`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        return data.error || "Erro ao enviar e-mail de recuperação";
+      const response = await axios.post(
+        `${process.env.REACT_APP_API_URL}/api/forgot-password`, 
+        { email }
+      );
+      
+      // Nova lógica de tratamento de resposta
+      if (response.status === 404) {
+        return "Email não localizado no sistema";
       }
-
-      return null;
+      
+      return response.data.error || null;
     } catch (err) {
-      console.error("Erro no forgotPassword:", err);
-      return "Erro de conexão com o servidor";
+      return err.response?.data?.error || "Erro ao verificar e-mail";
     }
   };
 
-  const resetPassword = async (email, code, newPassword) => {
+  // Redefinir senha (CORRIGIDO)
+  const resetPassword = async (email, newPassword) => {
     try {
       const response = await axios.post(
-        `${process.env.REACT_APP_API_URL}/api/reset-password`,
-        { email, code, newPassword }
+        `${process.env.REACT_APP_API_URL}/api/reset-password`, // Endpoint corrigido
+        { email, newPassword }
       );
-      return response.data;
+      
+      if (response.data.error) {
+        if (response.data.error.includes("igual")) {
+          return "Não pode ser a senha anterior";
+        }
+        return response.data.error;
+      }
+      
+      return null;
     } catch (err) {
-      return { error: err.response?.data?.error || "Erro ao redefinir senha" };
+      return err.response?.data?.error || "Erro ao redefinir senha";
     }
   };
-  
-  // Atualize o provider
+
   return (
     <AuthContext.Provider value={{ 
       user,
       signin,
       signup,
       forgotPassword,
-      validateResetCode, // Adicione esta linha
+      validateResetCode,
       resetPassword,
       logout
     }}>
