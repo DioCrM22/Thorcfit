@@ -5,6 +5,10 @@ import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
 import Home from "./pages/Home"
+import Perfil from './pages/Perfil';
+import Treinos from './pages/Treinos';        
+import Rotina from './pages/Rotina';           
+import Alimentacao from './pages/Alimentacao'; 
 
 function App() {
   return (
@@ -15,6 +19,11 @@ function App() {
       <Route path="/forgot-password" element={<ForgotPassword />} />
       <Route path="/home" element={<Home />} />
       <Route path="*" element={<Navigate to="/signin" replace />} />
+      <Route path="/perfil" element={<Perfil />} />
+      <Route path="/treinos" element={<Treinos />} />
+      <Route path="/rotina" element={<Rotina />} />
+      <Route path="/alimentacao" element={<Alimentacao />} />
+      <Route path="/" element={<Signin />} />
     </Routes>
   );
 }

@@ -99,14 +99,14 @@ const Signup = () => {
     }
 
     if (!validateNome(nome)) {
-      notify("👤 Digite nome completo!", "error");
-      return;
-    }
-    
-    if (!validateEmail(email)) {
-      notify("📧 E-mail inválido!", "error");
-      return;
-    }
+  notify("👤 Digite nome completo!", "error");
+  return;
+}
+
+if (!validateEmail(email)) {
+  notify("📧 E-mail inválido!", "error");
+  return;
+}
 
     try {
       const errorMessage = await signup(nome, email, senha);

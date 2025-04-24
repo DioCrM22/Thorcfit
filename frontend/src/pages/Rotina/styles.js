@@ -18,7 +18,6 @@ const slideUp = keyframes`
 `;
 
 export const Page = styled.div`
-  font-family: "Golos Text", sans-serif;
   padding-top: 60px;
   position: relative;
   animation: ${fadeInUp} 0.8s ease-out;
