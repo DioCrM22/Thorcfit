@@ -1,2 +1,0 @@
-ALTER TABLE usuarios
-ADD COLUMN reset_token VARCHAR(100);
