@@ -19,7 +19,7 @@
   "author": "Diogo Cruz Maia",
   "license": "MIT",
   "dependencies": {
-    "axios": "^1.8.4",
+    "axios": "^1.9.0",
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
@@ -29,6 +29,8 @@
     "multer": "^1.4.5-lts.2",
     "mysql2": "^3.14.1",
     "nodemailer": "^6.9.11",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
     "path": "^0.12.7",
     "sharp": "^0.34.1"
   },

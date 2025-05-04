@@ -136,45 +136,71 @@ router.post('/signup', validateSignupData, async (req, res) => {
   }
 });
 
-// Login Tradicional (atualizado)
-router.post('/api/login', async (req, res) => {
+// Login Tradicional
+router.post('/login', async (req, res) => {
+  const { email, senha } = req.body;
+
   try {
-    const { email, senha } = req.body;
-    
-    if (!email || !senha) {
-      return res.status(400).json({ 
+    // 1. Buscar usuário no banco
+    const [rows] = await db.query('SELECT * FROM usuario WHERE email = ?', [email]);
+
+    if (rows.length === 0) {
+      return res.status(401).json({
         success: false,
-        error: 'Email e senha são obrigatórios' 
+        error: 'Email não encontrado'
       });
     }
 
-    const user = await login(email, senha);
-    
+    const usuario = rows[0];
+
+    // 2. Verificar método de login
+    if (usuario.metodo_login === 'google') {
+      return res.status(400).json({
+        success: false,
+        error: 'Este usuário deve fazer login com o Google'
+      });
+    }
+
+    // 3. Validar senha
+    const senhaCorreta = await bcrypt.compare(senha, usuario.senha_hash);
+    if (!senhaCorreta) {
+      return res.status(401).json({
+        success: false,
+        error: 'Senha incorreta'
+      });
+    }
+
+    // 4. Gerar token JWT
     const token = jwt.sign(
-      { userId: user.id_usuario, email: user.email },
-      process.env.JWT_SECRET,
-      { expiresIn: '24h' }
+      {
+        userId: usuario.id_usuario,
+        email: usuario.email
+      },
+      JWT_CONFIG.secret,
+      { expiresIn: JWT_CONFIG.expiresIn }
     );
 
+    // 5. Retornar resposta
     res.json({
       success: true,
       token,
       usuario: {
-        id: user.id_usuario,
-        nome: user.nome,
-        email: user.email
+        id: usuario.id_usuario,
+        nome: usuario.nome,
+        email: usuario.email,
+        metodo_login: usuario.metodo_login || 'email'
       }
     });
-    
-  } catch (err) {
-    console.error('Erro no login:', err);
-    res.status(401).json({ 
+
+  } catch (erro) {
+    console.error('Erro no login:', erro);
+    res.status(500).json({
       success: false,
-      error: 'Falha na autenticação',
-      message: err.message
+      error: 'Erro interno no servidor'
     });
   }
 });
+
 
 router.get('/check-user/:email', async (req, res) => {
   try {
@@ -277,51 +303,39 @@ router.post('/google', async (req, res) => {
   try {
     const { token } = req.body;
 
-    // Validação mais robusta do token
-    if (!token || typeof token !== 'string') {
+    if (!token) {
       return res.status(400).json({ 
         success: false,
-        error: 'Token do Google inválido ou não fornecido',
-        code: 'INVALID_GOOGLE_TOKEN'
+        error: 'Token do Google não fornecido' 
       });
     }
 
-    // 1. Verificação do token com Google
+    // 1. Verificar token com Google
     const response = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
-      headers: { 
-        Authorization: `Bearer ${token}`,
-        Accept: 'application/json'
-      },
-      timeout: 5000 // Timeout de 5 segundos
+      headers: { Authorization: `Bearer ${token}` },
+      timeout: 5000
     });
-
-    // Validação do payload do Google
-    if (!response.data?.email || !response.data?.sub) {
-      throw new Error('Dados incompletos do Google');
-    }
 
     const { sub: googleId, name, email, picture } = response.data;
 
-    // 2. Buscar ou criar usuário no banco de dados
-    const [existingUser] = await db.query(
+    // 2. Buscar ou criar usuário
+    const [user] = await db.query(
       `SELECT * FROM usuario WHERE email = ? OR google_id = ? LIMIT 1`,
       [email, googleId]
     );
 
-    let user;
-    if (existingUser.length > 0) {
-      // Atualizar usuário existente se necessário
-      if (!existingUser[0].google_id || !existingUser[0].foto_perfil) {
-        await db.query(
-          `UPDATE usuario SET 
-           google_id = ?, 
-           foto_perfil = ?,
-           metodo_login = 'google'
-           WHERE id_usuario = ?`,
-          [googleId, picture, existingUser[0].id_usuario]
-        );
-      }
-      user = existingUser[0];
+    let usuario;
+    if (user.length > 0) {
+      // Atualizar usuário existente
+      await db.query(
+        `UPDATE usuario SET 
+         google_id = ?, 
+         foto_perfil = ?,
+         metodo_login = 'google'
+         WHERE id_usuario = ?`,
+        [googleId, picture, user[0].id_usuario]
+      );
+      usuario = user[0];
     } else {
       // Criar novo usuário
       const [result] = await db.query(
@@ -335,65 +349,46 @@ router.post('/google', async (req, res) => {
         `SELECT * FROM usuario WHERE id_usuario = ?`,
         [result.insertId]
       );
-      user = newUser[0];
+      usuario = newUser[0];
     }
 
-    // 3. Gerar token JWT com mais informações
+    // 3. Gerar token JWT
     const jwtToken = jwt.sign(
       {
-        userId: user.id_usuario,
-        email: user.email,
-        role: user.role || 'user',
-        loginMethod: 'google'
+        userId: usuario.id_usuario,
+        email: usuario.email
       },
-      process.env.JWT_SECRET,
-      { 
-        expiresIn: '24h',
-        algorithm: 'HS256'
-      }
+      JWT_CONFIG.secret,
+      { expiresIn: JWT_CONFIG.expiresIn }
     );
 
-    // 4. Resposta formatada
     res.json({
       success: true,
       token: jwtToken,
       usuario: {
-        id: user.id_usuario,
-        nome: user.nome,
-        email: user.email,
-        foto_perfil: user.foto_perfil,
-        role: user.role || 'user',
-        metodo_login: user.metodo_login || 'google'
+        id: usuario.id_usuario,
+        nome: usuario.nome,
+        email: usuario.email,
+        foto_perfil: usuario.foto_perfil,
+        metodo_login: 'google'
       }
     });
 
   } catch (err) {
-    console.error('Erro no login com Google:', {
-      message: err.message,
-      stack: err.stack,
-      response: err.response?.data
-    });
-
-    // Tratamento de erros mais específico
-    let statusCode = 401;
-    let errorMessage = 'Falha na autenticação do Google';
+    console.error('Erro no login com Google:', err);
     
+    let errorMessage = 'Falha na autenticação do Google';
     if (err.response?.status === 400) {
-      statusCode = 400;
       errorMessage = 'Token do Google inválido';
-    } else if (err.code === 'ECONNABORTED') {
-      statusCode = 504;
-      errorMessage = 'Tempo limite de conexão com o Google';
     }
 
-    res.status(statusCode).json({ 
+    res.status(401).json({ 
       success: false,
-      error: errorMessage,
-      message: err.message,
-      ...(process.env.NODE_ENV === 'development' && { details: err.response?.data })
+      error: errorMessage
     });
   }
 });
+
 
 router.post('/auth/forgot-password', async (req, res) => {
   try {
@@ -495,27 +490,126 @@ router.post('/api/auth/reset-password', async (req, res) => {
   }
 });
 
-router.get('/usuario-perfil', authenticateToken, async (req, res) => {
+// Obter perfil (GET)
+router.get('/usuario-perfil', authenticate, async (req, res) => {
   try {
-    db.query(
-      'SELECT id_usuario as id, nome, email FROM usuario WHERE id_usuario = ?', 
-      [req.user.id],
-      (err, rows) => {
-        if (err) {
-          console.error(err);
-          return res.status(500).json({ message: 'Erro interno do servidor' });
-        }
-        if (rows.length === 0) {
-          return res.status(404).json({ message: 'Usuário não encontrado' });
-        }
-        res.json(rows[0]);
-      }
+    const [user] = await db.query(`
+      SELECT id_usuario, nome, email, data_nascimento, genero, 
+             telefone, foto_perfil, altura, peso, objetivo 
+      FROM usuario WHERE id_usuario = ?`,
+      [req.user.userId]
     );
+
+    if (!user.length) {
+      return res.status(404).json({ success: false, error: 'Perfil não encontrado' });
+    }
+
+    res.json({ success: true, usuario: user[0] });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: 'Erro interno do servidor' });
+    res.status(500).json({ success: false, error: 'Erro ao buscar perfil' });
   }
 });
+
+// Atualizar perfil (PUT)
+router.put('/usuario-perfil', authenticate, upload.single('foto_perfil'), async (req, res) => {
+  try {
+    const { nome, email, data_nascimento, genero, telefone, altura, peso, objetivo } = req.body;
+    const userId = req.user.userId;
+
+    // Processar foto se foi enviada
+    let fotoPerfilUpdate = '';
+    if (req.file) {
+      const processedImage = await sharp(req.file.buffer)
+        .resize(500, 500)
+        .toFormat('png')
+        .toBuffer();
+      fotoPerfilUpdate = ', foto_perfil = ?';
+    }
+
+    await db.query(
+      `UPDATE usuario SET 
+       nome = ?, email = ?, data_nascimento = ?, genero = ?,
+       telefone = ?, altura = ?, peso = ?, objetivo = ?
+       ${fotoPerfilUpdate}
+       WHERE id_usuario = ?`,
+      [
+        nome, email, data_nascimento, genero,
+        telefone, altura, peso, objetivo,
+        ...(req.file ? [processedImage, userId] : [userId])
+      ]
+    );
+
+    res.json({ success: true, message: 'Perfil atualizado' });
+  } catch (err) {
+    res.status(500).json({ success: false, error: 'Erro ao atualizar perfil' });
+  }
+});
+
+router.put('/atualizar-perfil', authenticate, upload.single('foto_perfil'), async (req, res) => {
+  try {
+    const userId = req.user.userId;
+    const updateFields = {};
+    
+    // Campos que podem ser atualizados
+    const allowedFields = [
+      'nome_completo', 
+      'telefone', 
+      'altura_cm', 
+      'peso_kg', 
+      'genero', 
+      'data_nascimento', 
+      'objetivo'
+    ];
+    
+    // Adicionar campos do body
+    allowedFields.forEach(field => {
+      if (req.body[field] !== undefined) {
+        updateFields[field] = req.body[field];
+      }
+    });
+    
+    // Processar imagem se foi enviada
+    if (req.file) {
+      const processedImage = await sharp(req.file.buffer)
+        .resize(500, 500)
+        .toFormat('png')
+        .toBuffer();
+      updateFields.foto_perfil = processedImage;
+    }
+    
+    // Atualizar no banco de dados
+    await db.query(
+      `UPDATE usuario SET 
+       ${Object.keys(updateFields).map(field => `${field} = ?`).join(', ')}
+       WHERE id_usuario = ?`,
+      [...Object.values(updateFields), userId]
+    );
+    
+    // Buscar usuário atualizado
+    const [updatedUser] = await db.query(
+      `SELECT * FROM usuario WHERE id_usuario = ?`,
+      [userId]
+    );
+    
+    res.json({ 
+      success: true,
+      message: 'Perfil atualizado com sucesso!',
+      usuarioAtualizado: {
+        ...updatedUser[0],
+        dataNascimento: updatedUser[0].data_nascimento,
+        altura: updatedUser[0].altura_cm,
+        peso: updatedUser[0].peso_kg
+      }
+    });
+  } catch (err) {
+    console.error('Erro ao atualizar perfil:', err);
+    res.status(500).json({ 
+      success: false,
+      error: 'Erro ao atualizar o perfil' 
+    });
+  }
+});
+
 
 
 export default router;

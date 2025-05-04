@@ -7,9 +7,9 @@ const AuthContext = createContext();
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [initializing, setInitializing] = useState(true);
-  const [ setIsAuthenticated] = useState(false);
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
 
   // Primeiro definimos todas as funções que serão usadas
   const logout = useCallback(() => {
@@ -28,54 +28,68 @@ export const AuthProvider = ({ children }) => {
   const checkSession = useCallback(async () => {
     try {
       const token = localStorage.getItem('authToken');
-      if (!token) return;
+      if (!token) return null;
   
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      
-      const { data } = await axios.get(`${backendUrl}/api/usuario-perfil`, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
+      // Verifique o prefixo correto (/auth ou /api)
+      const { data } = await axios.get('http://localhost:5000/auth/usuario-perfil', {
+        headers: { Authorization: `Bearer ${token}` }
       });
-      
-      if (data?.usuario) {
+  
+      if (data?.success && data.usuario) {
         setUser(data.usuario);
-      } else {
-        throw new Error('Dados inválidos');
+        return data.usuario;
       }
+      throw new Error('Dados inválidos');
     } catch (error) {
       console.error('Erro ao verificar sessão:', error);
       logout();
+      return null;
     } finally {
       setInitializing(false);
     }
-  }, [logout]);  
+  }, [logout]);
 
-  // Depois configuramos os interceptors que usam essas funções
-  useEffect(() => {
-    const requestInterceptor = axios.interceptors.request.use(config => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
+  // Adicione esta função ao seu context
+const fetchUserProfile = async () => {
+  try {
+    const token = localStorage.getItem('authToken');
+    const { data } = await axios.get('/auth/usuario-perfil', {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    setUser(data);
+    return data;
+  } catch (error) {
+    console.error('Erro ao carregar perfil:', error);
+    logout();
+    return null;
+  }
+};
+
+const updateProfile = async (updatedData) => {
+  setLoading(true);
+  try {
+    const token = localStorage.getItem('authToken');
+    const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+
+    const { data } = await axios.put(`${backendUrl}/api/usuario-perfil`, updatedData, {
+      headers: {
+        Authorization: `Bearer ${token}`
       }
-      return config;
     });
 
-    const responseInterceptor = axios.interceptors.response.use(
-      response => response,
-      error => {
-        if (error.response?.status === 401) {
-          logout();
-        }
-        return Promise.reject(error);
-      }
-    );
-
-    return () => {
-      axios.interceptors.request.eject(requestInterceptor);
-      axios.interceptors.response.eject(responseInterceptor);
-    };
-  }, [logout]);
+    if (data?.usuarioAtualizado) {
+      setUser(data.usuarioAtualizado); // Atualiza o estado do usuário
+      return null;
+    } else {
+      return 'Erro ao atualizar perfil';
+    }
+  } catch (error) {
+    console.error('Erro ao atualizar perfil:', error);
+    return error.response?.data?.error || 'Erro ao atualizar perfil';
+  } finally {
+    setLoading(false);
+  }
+};
 
   const signup = async (nome, email, senha) => {
     setLoading(true);
@@ -108,21 +122,35 @@ export const AuthProvider = ({ children }) => {
   };
 
   const signin = async (email, senha) => {
+    setLoading(true);
     try {
-      const response = await axios.post('http://localhost:5000/api/login', {
+      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+      
+      const { data } = await axios.post(`${backendUrl}/auth/login`, {
         email,
         senha
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
-      const { token } = response.data;
-      localStorage.setItem('token', token);
-      setUser(response.data.usuario);
-      setIsAuthenticated(true);
-      return true;
+  
+      if (!data.token || !data.usuario) {
+        throw new Error('Resposta inválida do servidor');
+      }
+  
+      handleAuthSuccess(data.token, data.usuario);
+      return { success: true };
     } catch (error) {
-      console.error('Erro ao fazer login:', error);
-      return false;
+      console.error('Erro detalhado:', error);
+      return { 
+        success: false,
+        error: error.response?.data?.error || 'Erro ao fazer login' 
+      };
+    } finally {
+      setLoading(false);
     }
-  };  
+  };
 
   const forgotPassword = async (email) => {
     setLoading(true);
@@ -145,21 +173,21 @@ export const AuthProvider = ({ children }) => {
   };
 
   const resetPassword = async (email, newPassword) => {
-    setLoading(true);
-    try {
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      const { data } = await axios.post(`${backendUrl}/api/auth/reset-password`, {
-        email,
-        newPassword
-      });
-      return data.error || null;
-    } catch (error) {
-      console.error('Erro ao redefinir senha:', error);
-      return error.response?.data?.error || 'Erro ao redefinir senha';
-    } finally {
-      setLoading(false);
-    }
-  };
+  setLoading(true);
+  try {
+    const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+    const { data } = await axios.post(`${backendUrl}/api/auth/reset-password`, {
+      email,
+      newPassword
+    });
+    return data.error || null;
+  } catch (error) {
+    console.error('Erro ao redefinir senha:', error);
+    return error.response?.data?.error || 'Erro ao redefinir senha';
+  } finally {
+    setLoading(false);
+  }
+};
   // Inicialização
   useEffect(() => {
     checkSession();
@@ -170,11 +198,14 @@ export const AuthProvider = ({ children }) => {
       user,
       initializing,
       loading,
+      checkSession,
+      fetchUserProfile,
       signup,
       googleLogin,
       signin,
       forgotPassword,
       resetPassword,
+      updateProfile,
       logout
     }}>
       {children}

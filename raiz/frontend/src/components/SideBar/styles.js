@@ -11,6 +11,7 @@ export const Drawer = styled.div`
   transform: translateX(${({ open }) => open ? '0' : '-100%'});
   transition: transform 0.3s ease;
   z-index: 1000;
+  overflow-y: auto;
 `;
 
 export const CloseButton = styled.div`
@@ -71,79 +72,77 @@ export const ProfileSection = styled.div`
 `;
 
 export const Avatar = styled.img`
-  width: 150px;
-  height: 150px;
+  width: 100px;
+  height: 100px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #ff7f00;
 `;
 
-export const ChangePhotoButton = styled.button`
-  margin-top: 8px;
-  background: none;
-  border: none;
-  color: #ff7f00;
-  font-size: 0.9rem;
-  cursor: pointer;
-  font-weight: bold;
-  font-family: 'Poppins', sans-serif;
-  padding: 4px;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  &:hover {
-    color: #e67300;
-  }
-`;
-
-export const CropModal = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0,0,0,0.8);
-  z-index: 2000;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-`;
-
-export const CropContainer = styled.div`
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  width: 90%;
-  max-width: 500px;
-`;
-
-export const CropActions = styled.div`
-  display: flex;
-  justify-content: center;
-  gap: 15px;
+export const UserInfoContainer = styled.div`
+  width: 100%;
   margin-top: 20px;
 `;
 
-export const CropButton = styled.button`
-  background: #ff7f00;
-  color: white;
-  border: none;
-  padding: 10px 20px;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: bold;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-
-  &:hover {
-    background: #e67300;
-  }
+export const UserName = styled.h2`
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+  text-align: center;
+  margin-bottom: 15px;
 `;
 
-export const CropCancelButton = styled(CropButton)`
-  background: #ccc;
-  
-  &:hover {
-    background: #999;
+export const InfoDivider = styled.div`
+  height: 1px;
+  background-color: #e0e0e0;
+  margin: 10px 0;
+`;
+
+export const UserInfoGrid = styled.div`
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 8px;
+`;
+
+export const InfoItem = styled.div`
+  display: flex;
+  justify-content: space-between;
+  padding: 4px 0;
+`;
+
+export const InfoLabel = styled.span`
+  font-weight: 600;
+  color: #555;
+  font-size: 0.85rem;
+`;
+
+export const InfoValue = styled.span`
+  color: #333;
+  font-size: 0.85rem;
+  text-align: right;
+  max-width: 60%;
+  word-break: break-word;
+`;
+
+export const UserInfoLine = styled.div`
+  font-size: 0.8rem;
+  color: #555;
+  text-align: center;
+  margin: 10px 0;
+  line-height: 1.4;
+  word-break: break-word;
+`;
+
+export const ObjectiveText = styled.div`
+  font-size: 0.85rem;
+  color: #333;
+  text-align: center;
+  margin-top: 10px;
+  padding: 8px;
+  background: #f5f5f5;
+  border-radius: 4px;
+
+  strong {
+    color: #ff7f00;
   }
 `;

@@ -29,7 +29,7 @@ const Signin = () => {
   const [senha, setSenha] = useState("");
   const { notify } = useNotification(); 
 
-  const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,4}$/;
+  const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
   const handleGoogleLogin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -56,35 +56,35 @@ const Signin = () => {
 
   const handleLogin = async (e) => {
     e.preventDefault();
-
+  
+    // Validações do frontend
     if (!email || !senha) {
       notify("Preencha todos os campos obrigatórios!", "error");
       return;
     }
-
+  
     if (!emailRegex.test(email)) {
       notify("Formato de e-mail inválido!", "error");
       return;
     }
-
+  
     if (senha.length < 6) {
       notify("A senha deve ter pelo menos 6 caracteres!", "error");
       return;
     }
-
+  
     try {
-      const errorMessage = await signin(email, senha);
-
-      if (errorMessage) {
-        notify(errorMessage, "error");
-      } else {
+      const result = await signin(email, senha);
+      
+      if (result.success) {
         notify("Login realizado com sucesso!", "success");
-        setTimeout(() => {
-          navigate("/home");
-        }, 1000);
+        setTimeout(() => navigate("/home"), 1000);
+      } else {
+        notify(result.error || "Credenciais inválidas", "error");
       }
     } catch (error) {
-      notify("Erro ao processar o login", "error");
+      console.error("Erro no login:", error);
+      notify("Erro ao processar o login. Tente novamente.", "error");
     }
   };
 
