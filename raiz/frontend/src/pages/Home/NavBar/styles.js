@@ -6,7 +6,7 @@ export const Bar = styled.div`
   left: 0;
   right: 0;
   height: 60px;
-  padding: 0 16px;
+  padding:  15px 15px 15px 10px;
   display: flex;
   align-items: center;
   background: #fff;
@@ -15,13 +15,13 @@ export const Bar = styled.div`
 `;
 
 export const Title = styled.h1`
-  margin: 0 auto;
-  font-size: 1.8rem;
+  margin: 50px 80px;
+  font-size: 1.9rem;
   font-weight: 700;
   font-family: "Golos Text", sans-serif;
   display: flex;
-  align-items: center;
-  gap: 4px;
+  align-items: left;
+  gap: 9px;
 
   & > span:first-child {
     color: #0066cc;

@@ -1,6 +1,7 @@
 import styled from 'styled-components';
+import { motion } from 'framer-motion';
 
-export const Drawer = styled.div`
+export const Drawer = styled(motion.div)`
   position: fixed;
   top: 0;
   left: 0;
@@ -12,17 +13,21 @@ export const Drawer = styled.div`
   transition: transform 0.3s ease;
   z-index: 1000;
   overflow-y: auto;
+  padding: 20px 0;
 `;
 
 export const CloseButton = styled.div`
   padding: 16px;
   text-align: right;
+  position: absolute;
+  right: 0;
+  top: 0;
 `;
 
 export const NavList = styled.ul`
   list-style: none;
   padding: 0;
-  margin: 0;
+  margin: 20px 0;
   text-transform: uppercase;
 `;
 
@@ -31,28 +36,35 @@ export const NavItem = styled.li`
   cursor: pointer;
   text-align: center;
   font-family: "Poppins", sans-serif;
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-weight: 500;
   letter-spacing: 0.5px;
-  &:hover { 
-    background: #f5f5f5; 
+  transition: all 0.2s;
+  
+  &:hover {
+    background: #f5f5f5;
+    transform: translateX(5px);
   }
 `;
 
 export const NavItemExit = styled(NavItem)`
-  color: red;
+  color: #ff4444;
   margin-top: 20px;
+  &:hover {
+    background: #ffe5e5;
+  }
 `;
 
 export const Title = styled.h1`
-  font-size: 1.6rem;
-  font-weight: bold;
-  font-family: "Poppins", sans-serif;
-  text-align: center;
-  margin: 20px 0;
-  padding: 0 16px;
-  text-transform: uppercase;
-  letter-spacing: 1px;
+  font-size: 1.5rem;
+  font-weight: 700;
+  font-family: "Golos Text", sans-serif;
+  display: flex;
+  justify-content: center;
+  gap: 9px;
+  margin: 40px 0 20px;
+  width: 100%;
+  position: relative;
 
   & > span:first-child {
     color: #0066cc;
@@ -72,77 +84,59 @@ export const ProfileSection = styled.div`
 `;
 
 export const Avatar = styled.img`
-  width: 100px;
-  height: 100px;
+  width: 120px;
+  height: 120px;
   border-radius: 50%;
   object-fit: cover;
   border: 3px solid #ff7f00;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
 `;
 
 export const UserInfoContainer = styled.div`
   width: 100%;
-  margin-top: 20px;
+  margin-top: 25px;
+  text-align: center;
 `;
 
 export const UserName = styled.h2`
-  font-size: 1.2rem;
+  font-size: 1.3rem;
   font-weight: 600;
   color: #333;
-  text-align: center;
   margin-bottom: 15px;
+  letter-spacing: 0.5px;
 `;
 
 export const InfoDivider = styled.div`
   height: 1px;
   background-color: #e0e0e0;
-  margin: 10px 0;
+  margin: 15px 0;
+  width: 80%;
+  margin-left: auto;
+  margin-right: auto;
 `;
 
-export const UserInfoGrid = styled.div`
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 8px;
-`;
-
-export const InfoItem = styled.div`
+export const ContactInfo = styled.div`
+  font-size: 0.75rem;
+  color: #666;
+  line-height: 1.5;
   display: flex;
-  justify-content: space-between;
-  padding: 4px 0;
-`;
-
-export const InfoLabel = styled.span`
-  font-weight: 600;
-  color: #555;
-  font-size: 0.85rem;
-`;
-
-export const InfoValue = styled.span`
-  color: #333;
-  font-size: 0.85rem;
-  text-align: right;
-  max-width: 60%;
-  word-break: break-word;
-`;
-
-export const UserInfoLine = styled.div`
-  font-size: 0.8rem;
-  color: #555;
-  text-align: center;
-  margin: 10px 0;
-  line-height: 1.4;
-  word-break: break-word;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  padding: 0 10px;
 `;
 
 export const ObjectiveText = styled.div`
   font-size: 0.85rem;
   color: #333;
-  text-align: center;
-  margin-top: 10px;
-  padding: 8px;
-  background: #f5f5f5;
-  border-radius: 4px;
+  padding: 10px;
+  background: #fff4e6;
+  border-radius: 6px;
+  margin: 15px 10px 0;
+  border: 1px solid #ffd8b3;
 
   strong {
     color: #ff7f00;
+    font-weight: 600;
   }
 `;

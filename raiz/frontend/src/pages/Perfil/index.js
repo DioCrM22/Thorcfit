@@ -6,6 +6,7 @@ import axios from 'axios';
 import InputWithOptions from '../../components/InputWithOptions';
 import { useAuth } from '../../hooks/useAuth';
 import { Container, AnimatedTitle, TitleWord, ProfilePicture, EditButton } from './styles';
+import { FiArrowLeft } from 'react-icons/fi';
 import ImageCropper from './ImageCropper';
 import {
   Header,
@@ -25,6 +26,7 @@ import {
   CompactInputGroup,
   CompactInput,
   SpacingLine,
+  Separator,
   UnitWrapper,
   ViewModeField
 } from './styles';
@@ -215,7 +217,7 @@ const ProfilePage = () => {
     <Container>
       <Header>
         <BackButton onClick={() => navigate('/home')}>
-          <span className="material-icons" style={{ color: AZUL }}>arrow_back</span>
+            <FiArrowLeft size={24} />
         </BackButton>
         
         <div style={{ flex: 1, textAlign: 'center' }}>
@@ -272,22 +274,23 @@ const ProfilePage = () => {
       )}
 
       <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
-        <InputGroup>
+      <InputGroup>
           <Label>👤 Nome Completo</Label>
           {isEditing ? (
-            <Input
-              name="nome"
-              value={formData.nome}
-              onChange={handleInputChange}
-              error={errors.nome}
-              bordercolor={AZUL}
-            />
+            <>
+              <Input
+                name="nome"
+                value={formData.nome}
+                onChange={handleInputChange}
+                error={errors.nome}
+                bordercolor={AZUL}
+              />
+              {errors.nome && <ErrorMessage>{errors.nome}</ErrorMessage>}
+            </>
           ) : (
             <ViewModeField>{userData.nome || 'Não informado'}</ViewModeField>
           )}
-          {errors.nome && <ErrorMessage>{errors.nome}</ErrorMessage>}
         </InputGroup>
-
         <InputGroup>
           <Label>📱 Telefone</Label>
           {isEditing ? (
@@ -326,7 +329,7 @@ const ProfilePage = () => {
               bordercolor={AZUL}
             />
           ) : (
-            <ViewModeField>{userData.nome || 'Não informado'}</ViewModeField>
+            <ViewModeField>{userData.objetivo || 'Não informado'}</ViewModeField>
           )}
         </InputGroup>
 
@@ -344,7 +347,7 @@ const ProfilePage = () => {
                 bordercolor={AZUL}
               />
             ) : (
-              <ViewModeField>{userData.nome || 'Não informado'}</ViewModeField>
+              <ViewModeField>{userData.dataNascimento || 'Não informado'}</ViewModeField>
             )}
           </InputGroup>
 
@@ -362,7 +365,7 @@ const ProfilePage = () => {
                 />
               </UnitWrapper>
             ) : (
-              <ViewModeField>{userData.nome || 'Não informado'}</ViewModeField>
+              <ViewModeField>{userData.altura || 'Não informado'}</ViewModeField>
             )}
             {errors.altura && <ErrorMessage>{errors.altura}</ErrorMessage>}
           </CompactInputGroup>
@@ -380,7 +383,7 @@ const ProfilePage = () => {
                 />
               </UnitWrapper>
             ) : (
-              <ViewModeField>{userData.nome || 'Não informado'}</ViewModeField>
+              <ViewModeField>{userData.telefone || 'Não informado'}</ViewModeField>
             )}
             {errors.peso && <ErrorMessage>{errors.peso}</ErrorMessage>}
           </CompactInputGroup>
@@ -398,15 +401,17 @@ const ProfilePage = () => {
                 bordercolor={AZUL}
               />
             ) : (
-              <ViewModeField>{userData.nome || 'Não informado'}</ViewModeField>
+              <ViewModeField>{userData.genero || 'Não informado'}</ViewModeField>
             )}
           </InputGroup>
         </InputRow>
 
-        <SpacingLine />
+        <Separator>
+            <span><img src="/assets/images/iconlogo.png" alt="iconLogo" /></span>
+        </Separator>
 
         {isEditing && (
-            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', }}>
               <PasswordButton to="/forgot-password">
                 🔑 Alterar Senha
               </PasswordButton>

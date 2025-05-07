@@ -1,28 +1,33 @@
 import React from 'react';
-import { PieChart, Pie, Cell, Legend, ResponsiveContainer } from 'recharts';
+import { PieChart as RechartsPieChart, Pie, Cell, ResponsiveContainer, Legend } from 'recharts';
 import * as S from './styles';
 
-export default function PieChartComponent({ data }) {
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+
+const PieChart = ({ data }) => {
   return (
     <S.ChartWrapper>
-      <ResponsiveContainer width="100%" height={200}>
-        <PieChart>
+      <ResponsiveContainer width="100%" height={300}>
+        <RechartsPieChart>
           <Pie
             data={data}
-            dataKey="value"
-            nameKey="name"
-            innerRadius={40}
+            cx="50%"
+            cy="50%"
+            labelLine={false}
             outerRadius={80}
-            paddingAngle={4}
-            label
+            fill="#8884d8"
+            dataKey="value"
+            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
           >
-            {data.map((entry, idx) => (
-              <Cell key={idx} fill={S.COLORS[idx % S.COLORS.length]} />
+            {data.map((entry, index) => (
+              <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
           </Pie>
-          <Legend verticalAlign="bottom" height={36} />
-        </PieChart>
+          <Legend />
+        </RechartsPieChart>
       </ResponsiveContainer>
     </S.ChartWrapper>
   );
-}
+};
+
+export default PieChart;

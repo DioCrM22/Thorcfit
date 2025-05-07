@@ -1,40 +1,26 @@
-// pages/Home/index.js
+
 import React, { useState } from 'react';
-import NavBar from '../../components/NavBar';
-import Sidebar from '../../components/SideBar';
-import Tabs from '../../components/Tabs';
-import DaySelector from '../../components/DaySelector';
-import Chart from '../../components/PieChart';
+import NavBar from '../Home/NavBar';
+import DaySelector from '../Home/DaySelector';
 import * as S from './styles';
 
 export default function Home() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState('Treino');
+  const [setSidebarOpen] = useState(false);
   const [activeDay, setActiveDay] = useState('SEG');
-
-  const chartData = [
-    { name: 'A', value: 400 },
-    { name: 'B', value: 300 },
-    { name: 'C', value: 300 },
-    { name: 'D', value: 200 },
-  ];
 
   return (
     <S.Page>
       <NavBar onMenuClick={() => setSidebarOpen(true)} />
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       <S.Content>
         <S.CenteredLogo>
           <img src="/assets/images/logo.png" alt="Logo ThorcFit" />
           <S.SectionTitle>Rendimento🚀</S.SectionTitle>
         </S.CenteredLogo>
-        <Tabs tabs={['Treino', 'Alimentação']} active={activeTab} onChange={setActiveTab} />
         <DaySelector
           days={['DOM','SEG','TER','QUA','QUI','SEX','SAB']}
           activeDay={activeDay}
           onSelect={setActiveDay}
         />
-        <Chart data={chartData} />
       </S.Content>
     </S.Page>
   );

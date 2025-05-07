@@ -4,7 +4,7 @@ import { darken } from 'polished';
 
 const AZUL = '#3a86ff';
 const LARANJA = '#FF6B35';
-const VERDE = '##229a00';
+const VERDE = '#35eb21';
 
 const pageEntrance = keyframes`
   from { 
@@ -158,8 +158,7 @@ export const UploadLabel = styled.label`
 
 export const InputRow = styled.div`
   display: flex;
-  gap: 1rem;  // Espaçamento fixo de 1rem
-  margin-bottom: 1rem;
+  gap: 1.5rem;
   width: 100%;
 
   @media (max-width: 480px) {
@@ -170,7 +169,7 @@ export const InputRow = styled.div`
 
 export const InputGroup = styled.div`
   & + & {
-    margin-top: 0.5rem;
+    margin-top: 1rem;
   }
 
   input {
@@ -187,11 +186,11 @@ export const SpacingLine = styled.div`
 
 export const DoubleInputContainer = styled.div`
   display: flex;
-  margin-bottom: 0.5rem;
+  margin-bottom: 1.5rem;
   width: 100%;
 
   &:not(:last-child) {
-    margin-bottom: 0.5rem;
+    margin-bottom: 1rem;
   }
 
   input {
@@ -250,6 +249,7 @@ export const Select = styled.select`
 `;
 
 export const Button = styled.button`
+  font-family: "Golos Text", sans-serif;
   width: 100%;
   padding: 15px;
   background: ${props => props.cor || AZUL};
@@ -257,7 +257,7 @@ export const Button = styled.button`
   border: none;
   border-radius: 8px;
   font-size: 20px;
-  font-weight: 600;
+  font-weight: bold;
   cursor: pointer;
   transition: filter 0.2s ease;
   margin-top: ${props => props.mt ? `${props.mt}rem` : '0'};
@@ -293,7 +293,7 @@ export const EditButton = styled.button`
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white; /* Já está definido para todo o conteúdo do botão */
+  color: white;
   font-size: 1.2rem;
   box-shadow: 0 2px 5px rgba(0,0,0,0.2);
   transition: all 0.3s ease;
@@ -417,12 +417,14 @@ export const ViewModeField = styled.div`
 `;
 
 export const PasswordButton = styled(Link)`
+  font-family: "Golos Text", sans-serif;
   background: ${AZUL};
   color: white !important;
-  padding: 0.5rem 3rem;
+  padding: 0.8rem 2rem;
   border-radius: 6px;
   text-decoration: none;
   font-size: 1rem;
+  font-weight: bold;
   align-self: center;
   border: none;
   cursor: pointer;
@@ -433,6 +435,38 @@ export const PasswordButton = styled(Link)`
     background: ${darken(0.1, AZUL)};
     transform: translateY(-1px);
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+  }
+`;
+
+export const Separator = styled.div`
+  display: flex;
+  align-items: center;
+  margin: 5px 10px 35px;
+  
+  img {
+    width: 50px;
+    height: 50px;
+    transition: transform 0.3s ease;
+  }
+
+  &::before,
+  &::after {
+    content: "";
+    flex: 1;
+    border-bottom: 2px solid #ccc;
+  }
+  
+  &::before {
+    margin-right: 10px;
+  }
+  
+  &::after {
+    margin-left: 10px;
+  }
+  
+  span {
+    font-size: 30px;
+    color: #ccc;
   }
 `;
 
