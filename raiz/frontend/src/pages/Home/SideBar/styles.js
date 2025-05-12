@@ -61,10 +61,11 @@ export const Title = styled.h1`
   font-family: "Golos Text", sans-serif;
   display: flex;
   justify-content: center;
-  gap: 9px;
+  gap: 0; /* Removido o gap para juntar as letras */
   margin: 40px 0 20px;
   width: 100%;
   position: relative;
+  text-transform: uppercase;
 
   & > span:first-child {
     color: #0066cc;

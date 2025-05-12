@@ -55,7 +55,7 @@ export const Header = styled.div`
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 1.5rem;
+  margin-bottom: 1rem;
   position: relative;
 `;
 
@@ -82,7 +82,7 @@ export const ProfilePicture = styled.div`
   height: 200px;
   border-radius: 50%;
   background: #f0f2f5;
-  margin: 0 auto 2rem;
+  margin: 4rem auto 2rem;
   overflow: hidden;
   position: relative;
   border: 3px solid ${AZUL};
@@ -99,8 +99,10 @@ export const ProfileImage = styled.img`
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center center;
   animation: ${fadeIn} 0.5s ease 0.8s forwards;
   opacity: 0;
+  display: block;
 `;
 
 export const BackButton = styled.button`
@@ -132,6 +134,7 @@ export const BackButton = styled.button`
 
 export const UploadLabel = styled.label`
   position: absolute;
+  border-top: 60px;
   bottom: 0;
   right: 0;
   background: ${AZUL};

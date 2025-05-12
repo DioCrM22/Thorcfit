@@ -5,12 +5,11 @@ import InputMask from 'react-input-mask';
 import axios from 'axios';
 import InputWithOptions from '../../components/InputWithOptions';
 import { useAuth } from '../../hooks/useAuth';
-import { Container, AnimatedTitle, TitleWord, ProfilePicture, EditButton } from './styles';
-import { FiArrowLeft } from 'react-icons/fi';
+import { Container, ProfilePicture, EditButton } from './styles';
+import NavBar from '../../components/NavBar';
 import ImageCropper from './ImageCropper';
 import {
   Header,
-  BackButton,
   ProfileImage,
   PasswordButton,
   UploadLabel,
@@ -216,16 +215,12 @@ const ProfilePage = () => {
   return (
     <Container>
       <Header>
-        <BackButton onClick={() => navigate('/home')}>
-            <FiArrowLeft size={24} />
-        </BackButton>
-        
-        <div style={{ flex: 1, textAlign: 'center' }}>
-          <AnimatedTitle>
-            <TitleWord azul>Meu</TitleWord>
-            <TitleWord>Perfil</TitleWord>
-          </AnimatedTitle>
-        </div>
+        <NavBar 
+        title="PERFIL FIT"
+        showBack={true}
+        showMenu={false}
+        onBack={() => navigate('/HOME')}
+      />
 
         <EditButton 
           onClick={handleEditToggle} 

@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import Amigos from './Amigos';
 import DaySelector from './DaySelector';
-import NavBar from './NavBar';
+import NavBar from '../../components/NavBar';
 import Sidebar from './SideBar';
 import SolicitacoesAmizade from './SolicitacoesAmizade';
 import * as S from './styles';
@@ -24,7 +24,12 @@ export default function Home() {
 
   return (
     <S.Page>
-      <NavBar onMenuClick={() => setSidebarOpen(true)} />
+      <NavBar 
+        title="THORC FIT"
+        showBack={false}
+        showMenu={true}
+        onMenu={() => setSidebarOpen(true)}
+      />
       <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
       
       <S.Content>

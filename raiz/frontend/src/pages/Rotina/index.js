@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import NavBar from '../Home/NavBar';
+import NavBar from '../../components/NavBar';
 import DaySelector from '../Home/DaySelector';
 import * as S from './styles';
 

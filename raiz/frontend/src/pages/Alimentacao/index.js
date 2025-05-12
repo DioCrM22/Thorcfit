@@ -1,6 +1,6 @@
 // pages/Home/index.js
 import React, { useState } from 'react';
-import NavBar from '../Home/NavBar';
+import NavBar from '../../components/NavBar';
 import Sidebar from '../Home/SideBar';
 import Tabs from '../../components/Tabs';
 import DaySelector from '../Home/DaySelector';

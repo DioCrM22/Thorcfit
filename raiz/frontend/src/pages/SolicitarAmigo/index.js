@@ -1,14 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiCheck, FiPlus, FiFilter, FiX, FiArrowLeft } from 'react-icons/fi';
+import { FiCheck, FiPlus, FiFilter, FiX } from 'react-icons/fi';
+import NavBar from '../../components/NavBar';
 import {
   Container,
   Header,
-  BackButton,
-  TitleContainer,
-  TitleBlue,
-  TitleOrange,
   Logo,
   SearchContainer,
   SearchInput,
@@ -31,6 +28,7 @@ const mockUsers = [
     email: 'carlos@exemplo.com',
     telefone: '(11) 98765-4321',
     foto_perfil: '/assets/images/default-avatar.png',
+    tipo: 'Treinador',
     seguindo: true
   },
   {
@@ -39,6 +37,7 @@ const mockUsers = [
     email: 'ana@exemplo.com',
     telefone: '(21) 99876-5432',
     foto_perfil: '/assets/images/default-avatar.png',
+    tipo: 'Treinador',
     seguindo: false
   }
 ];
@@ -90,15 +89,14 @@ export default function AmigosPage() {
       variants={containerVariants}
     >
       <Header>
-        <BackButton onClick={() => navigate('/home')}>
-          <FiArrowLeft size={24} />
-        </BackButton>
-        <TitleContainer>
-          <TitleBlue>Gerenciar</TitleBlue>
-          <TitleOrange>Amigos</TitleOrange>
-        </TitleContainer>
+        <NavBar 
+        title="AMIGOS FIT"
+        showBack={true}
+        showMenu={false}
+        onBack={() => navigate('/home')}
+      />
         <Logo 
-          src="/assets/images/LogoForte.png" 
+          src="/assets/images/LogoAmigos.png" 
           alt="Logo Forte"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -114,7 +112,7 @@ export default function AmigosPage() {
         <SearchContainer>
           <SearchInput
             type="text"
-            placeholder="🔍Buscar por nome ou e-mail..."
+            placeholder="🔍Buscar por e-mail..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
@@ -169,6 +167,7 @@ export default function AmigosPage() {
                     <h4>{user.nome}</h4>
                     <p>{user.email}</p>
                     <p>{user.telefone}</p>
+                    <p>{user.tipo}</p>
                   </UserInfo>
 
                   <ActionGroup>

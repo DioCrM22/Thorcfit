@@ -13,6 +13,7 @@ const slideUp = keyframes`
 
 export const Page = styled.div`
   font-family: 'Golos Text', sans-serif;
+  text-transform: uppercase;
   min-height: 100vh;
   padding-top: 70px;
   background-color: #f5f5f5;
@@ -44,11 +45,12 @@ export const CenteredLogo = styled.div`
 `;
 
 export const SectionTitle = styled.h2`
-  font-size: 1.8rem;
+  font-size: 1.3rem;
   font-weight: 700;
-  margin-top: 16px;
+  margin-top: 10px;
   color: #0066cc;
   text-align: center;
+  text-transform: uppercase;
   font-family: "Golos Text", sans-serif;
   animation: ${slideUp} 0.7s ease-in-out both;
 `;
@@ -59,7 +61,7 @@ export const FloatingButtons = styled.div`
   right: 20px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 15px;
   z-index: 10;
 
   @media (max-width: 768px) {

@@ -9,49 +9,31 @@ export const DaysContainer = styled.div`
 
 export const Days = styled.div`
   display: flex;
-  gap: 5px;
-  padding: 5px;
-  overflow-x: auto;
-  max-width: 100%;
-  
-  &::-webkit-scrollbar {
-    height: 5px;
-  }
-
-  &::-webkit-scrollbar-thumb {
-    background: #0066cc;
-    border-radius: 3px;
-  }
-
-  &::-webkit-scrollbar-track {
-    background: #f1f1f1;
-    border-radius: 3px;
-  }
-
-  @media (max-width: 932px) {
-    gap: 2px;
-    padding: 2px;
-  }
-
-  @media (max-width: 480px) {
-    gap: 4px;
-    padding: 4px;
-  }
+  gap: 4px;
+  padding: 4px;
+  width: 100%;
+  flex-wrap: nowrap;
+  justify-content: space-between;
 `;
 
 export const Day = styled.button`
-  padding: 10px 16px;
-  min-width: 60px;
+  flex: 1 0 auto;
+  min-width: calc((100% / 7) - 4px);
+  max-width: calc((100% / 7) - 4px);
+  padding: 0.5rem 0.3rem;
   border: 1px solid #ddd;
   border-radius: 12px;
   background: ${({ active }) => active ? '#0066cc' : '#fff'};
   color: ${({ active }) => active ? '#fff' : '#333'};
   cursor: pointer;
-  font-size: 15px;
+  font-size: clamp(0.6rem, 1.2vw, 0.9rem);
   font-weight: 500;
-  flex-shrink: 0;
-  transition: all 0.3s ease;
+  transition: all 0.2s ease;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 
   &:hover {
     transform: translateY(-2px);
@@ -64,16 +46,15 @@ export const Day = styled.button`
   }
 
   @media (max-width: 768px) {
-    min-width: 55px;
-    padding: 8px 14px;
-    font-size: 14px;
-    border-radius: 10px;
+    padding: 0.4rem 0.2rem;
+    border-radius: 8px;
+    font-size: clamp(0.5rem, 1.1vw, 0.8rem);
   }
 
   @media (max-width: 480px) {
-    min-width: 50px;
-    padding: 6px 12px;
-    font-size: 13px;
-    border-radius: 8px;
+    padding: 0.3rem 0.1rem;
+    font-size: clamp(0.45rem, 1vw, 0.7rem);
+    min-width: calc((100% / 7) - 2px);
+    max-width: calc((100% / 7) - 2px);
   }
 `;

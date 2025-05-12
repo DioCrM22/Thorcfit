@@ -2,7 +2,6 @@ import styled from 'styled-components';
 import { motion } from 'framer-motion';
 
 const AZUL = '#3a86ff';
-const LARANJA = '#FF6B35';
 const VERDE = '#35eb21';
 const VERMELHO = '#ff4444';
 
@@ -22,10 +21,10 @@ export const Header = styled.header`
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 30px 0;
-  margin-bottom: 20px;
+  padding: 10px 0;    
+  margin-bottom: 10px; 
   position: relative;
-  gap: 20px;
+  gap: 10px;           
 `;
 
 export const BackButton = styled.button`
@@ -57,28 +56,7 @@ export const BackButton = styled.button`
 
 export const Logo = styled(motion.img)`
   height: 200px;
-  margin: 10px auto;
-`;
-
-export const TitleContainer = styled.div`
-  display: flex;
-  font-family: 'Golos Text', sans-serif;
-  gap: 5px;
-  margin-top: 15px;
-`;
-
-export const TitleBlue = styled.span`
-  font-size: 36px;
-  font-family: 'Golos Text', sans-serif;
-  font-weight: 700;
-  color: ${AZUL};
-`;
-
-export const TitleOrange = styled.span`
-  font-size: 36px;
-  font-weight: 700;
-  font-family: 'Golos Text', sans-serif;
-  color: ${LARANJA};
+  margin: 50px 50px 5px 50px;
 `;
 
 export const SearchContainer = styled.div`
