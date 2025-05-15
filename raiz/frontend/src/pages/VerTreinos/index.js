@@ -279,13 +279,10 @@ export default function VerTreino() {
     navigate(`/treino/${treinoId}`);
   };
 
-  const handleSelectTreinador = (treinador) => {
-    setTreinadorAtual(treinador);
-    setViewMode('treinador');
-  };
-
   const toggleViewMode = () => {
-    setViewMode(viewMode === 'pessoal' ? 'treinador' : 'pessoal');
+    if (viewMode === 'pessoal') return;
+    setViewMode('pessoal');
+    setTreinadorAtual(null);
   };
 
   const handleOpenConfirmModal = () => {
@@ -315,33 +312,34 @@ export default function VerTreino() {
     <S.CenteredLogo>
       <img src="/assets/images/LogoForte.png" alt="Logo ThorcFit" />
       <S.ViewModeTitle>
-        {viewMode === 'pessoal' ? 'MEUS TREINOS' : treinadorAtual?.nome || 'TREINADOR'}
+        {viewMode === 'pessoal' ? 'MEUS TREINOS 👤' : 
+        viewMode === 'treinador' ? (treinadorAtual?.nome || 'ESCOLHER UM TREINADOR EM: ') : ''}
       </S.ViewModeTitle>
     </S.CenteredLogo>
 
     {/* Botões flutuantes */}
     <MeusTreinosButton 
-      onClick={() => {
-        toggleViewMode();
-        setTreinadorAtual(null);
-      }}
-      active={viewMode === 'pessoal'}
-      whileHover={{ scale: 1.1 }}
-    />
+        onClick={toggleViewMode}
+        active={viewMode === 'pessoal'}
+        whileHover={{ scale: 1.1 }}
+      />
 
-    <TreinadorSwitch 
-      treinadores={mockTreinadores}
-      onSelectTreinador={handleSelectTreinador}
-      currentTreinador={treinadorAtual}
-    />
+      <TreinadorSwitch 
+        treinadores={mockTreinadores}
+        onSelectTreinador={(treinador) => {
+          setTreinadorAtual(treinador);
+          setViewMode('treinador');
+        }}
+        currentTreinador={treinadorAtual}
+      />
 
     <S.Content>
       {viewMode === 'treinador' && treinadorAtual && (
-        <S.ProfileHeader
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
+          <S.ProfileHeader
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3 }}
+          >
           <S.ProfileImageContainer>
             <S.ProfileImage src={treinadorAtual.foto} alt="Foto do treinador" />
           </S.ProfileImageContainer>

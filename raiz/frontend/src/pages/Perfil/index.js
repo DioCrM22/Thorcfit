@@ -216,18 +216,18 @@ const ProfilePage = () => {
     <Container>
       <Header>
         <NavBar 
-        title="PERFIL FIT"
-        showBack={true}
-        showMenu={false}
-        onBack={() => navigate('/HOME')}
-      />
+          title="PERFIL FIT"
+          showBack={true}
+          showMenu={false}
+          onBack={() => navigate('/HOME')}
+        />
 
         <EditButton 
           onClick={handleEditToggle} 
           isEditing={isEditing}
         >
           <span>
-            {isEditing ? '✕' : '✏️'} {/* Use '✕' ao invés de '✖' */}
+            {isEditing ? '✕' : '✏️'}
           </span>
         </EditButton>
       </Header>

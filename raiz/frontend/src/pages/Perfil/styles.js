@@ -6,17 +6,6 @@ const AZUL = '#3a86ff';
 const LARANJA = '#FF6B35';
 const VERDE = '#35eb21';
 
-const pageEntrance = keyframes`
-  from { 
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to { 
-    opacity: 1;
-    transform: translateY(0);
-  }
-`;
-
 const titleEntrance = keyframes`
   from { 
     opacity: 0;
@@ -45,18 +34,21 @@ const fadeIn = keyframes`
 `;
 
 export const Container = styled.div`
-  padding: 1rem;
-  max-width: 500px;
+  max-width: 800px;
   margin: 0 auto;
-  animation: ${pageEntrance} 0.5s ease-out forwards;
+  padding: 20px;
+  min-height: 100vh;
+  font-family: 'Golos Text', sans-serif;
 `;
 
-export const Header = styled.div`
+export const Header = styled.header`
   display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 1rem;
+  padding: 10px 0;    
+  margin-bottom: 10px; 
   position: relative;
+  gap: 10px;           
 `;
 
 export const AnimatedTitle = styled.h1`
