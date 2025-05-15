@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
-const { Profissional, VinculoProfissional } = require('../models');
+const db = require('../models');
+const Profissional = db.Profissional;
+const VinculoProfissional = db.VinculoProfissional;
 
 module.exports = {
   // Middleware base de autenticação
@@ -14,9 +16,9 @@ module.exports = {
       const decoded = jwt.verify(token, process.env.JWT_SECRET);
       
       // Buscar informações atualizadas do usuário
-      const user = await Usuario.findByPk(decoded.id, {
+      const user = await db.Usuario.findByPk(decoded.id, {
         include: [{
-          model: Profissional,
+          model: db.Profissional,
           as: 'profissional'
         }]
       });
