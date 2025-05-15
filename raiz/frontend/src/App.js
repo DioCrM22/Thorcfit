@@ -1,13 +1,16 @@
-//App.js
+// src/App.js
 import React from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Signin from "./pages/Signin";
 import Signup from "./pages/Signup";
 import ForgotPassword from "./pages/ForgotPassword";
-import ResetPassword from "./pages/ResetPassword";
-import Home from "./pages/Home";
-import ConfirmationPage from './pages/Confirmation';
-import EmailConfirmationHandler from './pages/EmailConfirmationHandler';
+import Home from "./pages/Home"
+import Perfil from './pages/Perfil';
+import SolicitarAmigo from './pages/SolicitarAmigo';
+import Treinos from './pages/Treinos';
+import VerTreinos from './pages/VerTreinos';         
+import Rotina from './pages/Rotina';           
+import Alimentacao from './pages/Alimentacao'; 
 
 function App() {
   return (
@@ -15,11 +18,15 @@ function App() {
       <Route path="/" element={<Signin />} />
       <Route path="/signin" element={<Signin />} />
       <Route path="/signup" element={<Signup />} />
-      <Route path="/aguardando-confirmacao" element={<ConfirmationPage />} />
-      <Route path="/confirmar-email/:token" element={<EmailConfirmationHandler />} />
       <Route path="/forgot-password" element={<ForgotPassword />} />
-      <Route path="/reset-password/:token" element={<ResetPassword />} />
       <Route path="/home" element={<Home />} />
+      <Route path="/perfil" element={<Perfil />} />
+      <Route path="/solicitar-amigo" element={<SolicitarAmigo />} />
+      <Route path="/treinos" element={<Treinos />} />
+      <Route path="/ver-treinos" element={<VerTreinos />} />
+      <Route path="/rotina" element={<Rotina />} />
+      <Route path="/alimentacao" element={<Alimentacao />} />
+      <Route path="*" element={<Navigate to="/signin" replace />} />
     </Routes>
   );
 }
