@@ -3,9 +3,9 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Tempo de geração: 25/04/2025 às 17:49
--- Versão do servidor: 10.4.28-MariaDB
--- Versão do PHP: 8.2.4
+-- Tempo de geração: 08/05/2025 às 21:32
+-- Versão do servidor: 10.4.32-MariaDB
+-- Versão do PHP: 8.2.12
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -64,23 +64,6 @@ CREATE TABLE `alimento_refeicao` (
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `comunicacao`
---
-
-CREATE TABLE `comunicacao` (
-  `id_mensagem` int(11) NOT NULL,
-  `id_remetente` int(11) NOT NULL COMMENT 'ID do usuário ou profissional',
-  `id_destinatario` int(11) NOT NULL COMMENT 'ID do usuário ou profissional',
-  `tipo_remetente` enum('usuario','profissional') NOT NULL,
-  `data_envio` datetime DEFAULT current_timestamp(),
-  `mensagem` text NOT NULL,
-  `lida` tinyint(1) DEFAULT 0,
-  `tipo_mensagem` enum('texto','sistema','ajuste_plano') NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Estrutura para tabela `diario_alimentar`
 --
 
@@ -114,17 +97,16 @@ CREATE TABLE `exercicio` (
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `exercicio_treino`
+-- Estrutura para tabela `exercicios_do_treino`
 --
 
-CREATE TABLE `exercicio_treino` (
+CREATE TABLE `exercicios_do_treino` (
   `id_treino` int(11) NOT NULL,
   `id_exercicio` int(11) NOT NULL,
   `series` int(11) NOT NULL,
   `repeticoes` int(11) NOT NULL,
-  `carga` decimal(8,2) DEFAULT NULL,
-  `id_exercicio_treino` bigint(20) UNSIGNED NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `carga` decimal(8,2) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -146,22 +128,28 @@ CREATE TABLE `metricas_usuario` (
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `objetivo`
+-- Estrutura para tabela `nutricionista`
 --
 
-CREATE TABLE `objetivo` (
-  `id_objetivo` int(11) NOT NULL,
-  `nome` varchar(20) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+CREATE TABLE `nutricionista` (
+  `id_nutricionista` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `registro_nutricionista` varchar(20) DEFAULT NULL,
+  `bio` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
 
 --
--- Despejando dados para a tabela `objetivo`
+-- Estrutura para tabela `personal_trainer`
 --
 
-INSERT INTO `objetivo` (`id_objetivo`, `nome`) VALUES
-(2, 'emagrecimento'),
-(1, 'hipertrofia'),
-(3, 'manutencao');
+CREATE TABLE `personal_trainer` (
+  `id_personal` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `registro_personal` varchar(20) DEFAULT NULL,
+  `bio` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -172,7 +160,6 @@ INSERT INTO `objetivo` (`id_objetivo`, `nome`) VALUES
 CREATE TABLE `plano_nutricional` (
   `id_plano_nutricional` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
-  `id_profissional` int(11) NOT NULL,
   `data_criacao` date NOT NULL,
   `data_validade` date DEFAULT NULL,
   `calorias_diarias` int(11) DEFAULT NULL,
@@ -181,7 +168,8 @@ CREATE TABLE `plano_nutricional` (
   `gorduras_diarias` int(11) DEFAULT NULL,
   `objetivo` text DEFAULT NULL,
   `observacoes` text DEFAULT NULL,
-  `status` enum('ativo','inativo','em_avaliacao') DEFAULT 'ativo'
+  `status` enum('ativo','inativo','em_avaliacao') DEFAULT 'ativo',
+  `id_nutricionista` int(11) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
@@ -192,76 +180,12 @@ CREATE TABLE `plano_nutricional` (
 
 CREATE TABLE `plano_treino` (
   `id_plano_treino` int(11) NOT NULL,
-  `tipo_criador` enum('usuario','profissional') NOT NULL,
-  `id_criador` int(11) NOT NULL,
+  `tipo_criador` enum('usuario','personal') NOT NULL,
+  `id_criador_usuario` int(11) DEFAULT NULL,
+  `id_criador_personal` int(11) DEFAULT NULL,
   `nome` varchar(100) NOT NULL,
   `data_criacao` date NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Acionadores `plano_treino`
---
-DELIMITER $$
-CREATE TRIGGER `tr_limite_planos` BEFORE INSERT ON `plano_treino` FOR EACH ROW BEGIN
-    DECLARE total_planos INT;
-    
-    SELECT COUNT(*) INTO total_planos
-    FROM plano_treino
-    WHERE 
-        tipo_criador = NEW.tipo_criador
-        AND id_criador = NEW.id_criador;
-    
-    IF (NEW.tipo_criador = 'usuario' AND total_planos >= 3) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Limite de 3 planos para usuários';
-    END IF;
-    
-    IF (NEW.tipo_criador = 'profissional' AND total_planos >= 5) THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'Limite de 5 planos por profissional';
-    END IF;
-END
-$$
-DELIMITER ;
-DELIMITER $$
-CREATE TRIGGER `verificar_limite_planos_usuario` BEFORE INSERT ON `plano_treino` FOR EACH ROW BEGIN
-  IF NEW.tipo_criador = 'usuario' THEN
-    IF (SELECT COUNT(*) FROM plano_treino 
-        WHERE id_criador = NEW.id_criador 
-        AND tipo_criador = 'usuario') >= 3 THEN
-      SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Usuário atingiu o limite de 3 planos';
-    END IF;
-  ELSE
-    IF (SELECT COUNT(*) FROM plano_treino 
-        WHERE id_criador = NEW.id_criador 
-        AND tipo_criador = 'profissional') >= 5 THEN
-      SIGNAL SQLSTATE '45000'
-      SET MESSAGE_TEXT = 'Profissional atingiu o limite de 5 planos por usuário';
-    END IF;
-  END IF;
-END
-$$
-DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `profissional`
---
-
-CREATE TABLE `profissional` (
-  `id_profissional` int(11) NOT NULL,
-  `nome` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `senha_hash` varchar(255) NOT NULL,
-  `tipo` enum('nutricionista','personal_trainer') NOT NULL,
-  `registro_profissional` varchar(20) NOT NULL,
-  `especialidade` varchar(100) DEFAULT NULL,
-  `bio` text DEFAULT NULL,
-  `foto_perfil` varchar(255) DEFAULT NULL,
-  `taxa_aceitacao` decimal(5,2) DEFAULT NULL COMMENT 'Percentual de aceitação de solicitações'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -280,45 +204,6 @@ CREATE TABLE `refeicao` (
 -- --------------------------------------------------------
 
 --
--- Estrutura para tabela `sessao_treino`
---
-
-CREATE TABLE `sessao_treino` (
-  `id_sessao` int(11) NOT NULL,
-  `id_usuario` int(11) DEFAULT NULL,
-  `id_treino` int(11) DEFAULT NULL,
-  `data` timestamp NOT NULL DEFAULT current_timestamp(),
-  `duracao` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
---
--- Acionadores `sessao_treino`
---
-DELIMITER $$
-CREATE TRIGGER `limpar_sessoes_antigas` AFTER INSERT ON `sessao_treino` FOR EACH ROW BEGIN
-  DELETE FROM sessao_treino 
-  WHERE id_usuario = NEW.id_usuario
-  AND data < DATE_SUB(NEW.data, INTERVAL 7 DAY);
-END
-$$
-DELIMITER ;
-
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `treino`
---
-
-CREATE TABLE `treino` (
-  `id_treino` int(11) NOT NULL,
-  `id_plano` int(11) DEFAULT NULL,
-  `nome` varchar(100) NOT NULL,
-  `ordem` int(11) NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-
--- --------------------------------------------------------
-
---
 -- Estrutura para tabela `usuario`
 --
 
@@ -330,52 +215,43 @@ CREATE TABLE `usuario` (
   `data_nascimento` date NOT NULL,
   `genero` enum('masculino','feminino','outro') DEFAULT NULL,
   `telefone` varchar(20) DEFAULT NULL,
-  `foto_perfil` varchar(255) DEFAULT NULL,
   `data_cadastro` datetime DEFAULT current_timestamp(),
-  `id_objetivo` int(11) NOT NULL
+  `id_objetivo` enum('manutenção','ganho','perca') DEFAULT NULL,
+  `google_id` varchar(255) DEFAULT NULL,
+  `avatar` varchar(255) DEFAULT NULL,
+  `metodo_login` varchar(20) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estrutura stand-in para view `view_acompanhamento_profissional`
--- (Veja abaixo para a visão atual)
---
-CREATE TABLE `view_acompanhamento_profissional` (
-`id_vinculo` int(11)
-,`profissional` varchar(100)
-,`tipo_profissional` enum('nutricionista','personal_trainer')
-,`usuario` varchar(100)
-,`registros_nutricionais` bigint(21)
-,`sessoes_treino` bigint(21)
-,`ultima_avaliacao` date
-);
-
--- --------------------------------------------------------
-
---
--- Estrutura para tabela `vinculo_profissional`
+-- Estrutura para tabela `vinculo_nutricional`
 --
 
-CREATE TABLE `vinculo_profissional` (
+CREATE TABLE `vinculo_nutricional` (
   `id_vinculo` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
-  `id_profissional` int(11) NOT NULL,
-  `tipo_vinculo` enum('nutricionista','personal_trainer') NOT NULL,
-  `data_inicio` date NOT NULL,
+  `id_nutricionista` int(11) NOT NULL,
+  `data_inicio` date DEFAULT NULL,
   `data_fim` date DEFAULT NULL,
-  `status` enum('ativo','inativo','suspenso') DEFAULT 'ativo',
-  `permissao_dados` enum('restrito','completo') DEFAULT 'restrito'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+  `status` enum('ativo','inativo','suspenso') DEFAULT NULL,
+  `permissao_dados` enum('restrito','completo') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
 --
--- Estrutura para view `view_acompanhamento_profissional`
+-- Estrutura para tabela `vinculo_treino`
 --
-DROP TABLE IF EXISTS `view_acompanhamento_profissional`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `view_acompanhamento_profissional`  AS SELECT `vp`.`id_vinculo` AS `id_vinculo`, `p`.`nome` AS `profissional`, `p`.`tipo` AS `tipo_profissional`, `u`.`nome` AS `usuario`, count(distinct `dn`.`id_registro`) AS `registros_nutricionais`, count(distinct `st`.`id_sessao`) AS `sessoes_treino`, max(`mu`.`data_registro`) AS `ultima_avaliacao` FROM (((((`vinculo_profissional` `vp` join `profissional` `p` on(`vp`.`id_profissional` = `p`.`id_profissional`)) join `usuario` `u` on(`vp`.`id_usuario` = `u`.`id_usuario`)) left join `diario_alimentar` `dn` on(`u`.`id_usuario` = `dn`.`id_usuario`)) left join `sessao_treino` `st` on(`u`.`id_usuario` = `st`.`id_usuario`)) left join `metricas_usuario` `mu` on(`u`.`id_usuario` = `mu`.`id_usuario`)) WHERE `vp`.`status` = 'ativo' GROUP BY `vp`.`id_vinculo`, `p`.`nome`, `p`.`tipo`, `u`.`nome` ;
+CREATE TABLE `vinculo_treino` (
+  `id_vinculo` int(11) NOT NULL,
+  `id_usuario` int(11) NOT NULL,
+  `id_personal` int(11) NOT NULL,
+  `data_inicio` date DEFAULT NULL,
+  `data_fim` date DEFAULT NULL,
+  `status` enum('ativo','inativo','suspenso') DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Índices para tabelas despejadas
@@ -397,14 +273,6 @@ ALTER TABLE `alimento_refeicao`
   ADD KEY `id_alimento` (`id_alimento`);
 
 --
--- Índices de tabela `comunicacao`
---
-ALTER TABLE `comunicacao`
-  ADD PRIMARY KEY (`id_mensagem`),
-  ADD KEY `id_remetente` (`id_remetente`),
-  ADD KEY `id_destinatario` (`id_destinatario`);
-
---
 -- Índices de tabela `diario_alimentar`
 --
 ALTER TABLE `diario_alimentar`
@@ -421,11 +289,10 @@ ALTER TABLE `exercicio`
 ALTER TABLE `exercicio` ADD FULLTEXT KEY `nome` (`nome`,`descricao`);
 
 --
--- Índices de tabela `exercicio_treino`
+-- Índices de tabela `exercicios_do_treino`
 --
-ALTER TABLE `exercicio_treino`
-  ADD PRIMARY KEY (`id_exercicio_treino`),
-  ADD KEY `id_treino` (`id_treino`),
+ALTER TABLE `exercicios_do_treino`
+  ADD PRIMARY KEY (`id_treino`,`id_exercicio`),
   ADD KEY `id_exercicio` (`id_exercicio`);
 
 --
@@ -436,11 +303,18 @@ ALTER TABLE `metricas_usuario`
   ADD KEY `idx_usuario_data` (`id_usuario`,`data_registro`);
 
 --
--- Índices de tabela `objetivo`
+-- Índices de tabela `nutricionista`
 --
-ALTER TABLE `objetivo`
-  ADD PRIMARY KEY (`id_objetivo`),
-  ADD UNIQUE KEY `nome` (`nome`);
+ALTER TABLE `nutricionista`
+  ADD PRIMARY KEY (`id_nutricionista`),
+  ADD KEY `id_usuario` (`id_usuario`);
+
+--
+-- Índices de tabela `personal_trainer`
+--
+ALTER TABLE `personal_trainer`
+  ADD PRIMARY KEY (`id_personal`),
+  ADD KEY `id_usuario` (`id_usuario`);
 
 --
 -- Índices de tabela `plano_nutricional`
@@ -448,21 +322,15 @@ ALTER TABLE `objetivo`
 ALTER TABLE `plano_nutricional`
   ADD PRIMARY KEY (`id_plano_nutricional`),
   ADD KEY `id_usuario` (`id_usuario`),
-  ADD KEY `id_profissional` (`id_profissional`);
+  ADD KEY `idx_plnut_id_nutricionista` (`id_nutricionista`);
 
 --
 -- Índices de tabela `plano_treino`
 --
 ALTER TABLE `plano_treino`
   ADD PRIMARY KEY (`id_plano_treino`),
-  ADD KEY `fk_plano_criador_profissional` (`id_criador`);
-
---
--- Índices de tabela `profissional`
---
-ALTER TABLE `profissional`
-  ADD PRIMARY KEY (`id_profissional`),
-  ADD UNIQUE KEY `email` (`email`);
+  ADD KEY `id_criador_usuario` (`id_criador_usuario`),
+  ADD KEY `id_criador_personal` (`id_criador_personal`);
 
 --
 -- Índices de tabela `refeicao`
@@ -472,19 +340,6 @@ ALTER TABLE `refeicao`
   ADD KEY `id_registro` (`id_registro`);
 
 --
--- Índices de tabela `sessao_treino`
---
-ALTER TABLE `sessao_treino`
-  ADD PRIMARY KEY (`id_sessao`),
-  ADD KEY `fk_sessao_treino` (`id_treino`);
-
---
--- Índices de tabela `treino`
---
-ALTER TABLE `treino`
-  ADD PRIMARY KEY (`id_treino`);
-
---
 -- Índices de tabela `usuario`
 --
 ALTER TABLE `usuario`
@@ -492,13 +347,20 @@ ALTER TABLE `usuario`
   ADD UNIQUE KEY `email` (`email`);
 
 --
--- Índices de tabela `vinculo_profissional`
+-- Índices de tabela `vinculo_nutricional`
 --
-ALTER TABLE `vinculo_profissional`
+ALTER TABLE `vinculo_nutricional`
   ADD PRIMARY KEY (`id_vinculo`),
-  ADD UNIQUE KEY `id_usuario` (`id_usuario`,`id_profissional`,`tipo_vinculo`),
-  ADD KEY `idx_vinculos_usuario` (`id_usuario`,`status`),
-  ADD KEY `idx_vinculos_profissional` (`id_profissional`,`status`);
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_nutricionista` (`id_nutricionista`);
+
+--
+-- Índices de tabela `vinculo_treino`
+--
+ALTER TABLE `vinculo_treino`
+  ADD PRIMARY KEY (`id_vinculo`),
+  ADD KEY `id_usuario` (`id_usuario`),
+  ADD KEY `id_personal` (`id_personal`);
 
 --
 -- AUTO_INCREMENT para tabelas despejadas
@@ -517,12 +379,6 @@ ALTER TABLE `alimento_refeicao`
   MODIFY `id_alimento_refeicao` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de tabela `comunicacao`
---
-ALTER TABLE `comunicacao`
-  MODIFY `id_mensagem` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT de tabela `diario_alimentar`
 --
 ALTER TABLE `diario_alimentar`
@@ -535,16 +391,22 @@ ALTER TABLE `exercicio`
   MODIFY `id_exercicio` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de tabela `exercicio_treino`
---
-ALTER TABLE `exercicio_treino`
-  MODIFY `id_exercicio_treino` bigint(20) UNSIGNED NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT de tabela `metricas_usuario`
 --
 ALTER TABLE `metricas_usuario`
   MODIFY `id_metrica` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `nutricionista`
+--
+ALTER TABLE `nutricionista`
+  MODIFY `id_nutricionista` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `personal_trainer`
+--
+ALTER TABLE `personal_trainer`
+  MODIFY `id_personal` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `plano_nutricional`
@@ -559,22 +421,10 @@ ALTER TABLE `plano_treino`
   MODIFY `id_plano_treino` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de tabela `profissional`
---
-ALTER TABLE `profissional`
-  MODIFY `id_profissional` int(11) NOT NULL AUTO_INCREMENT;
-
---
 -- AUTO_INCREMENT de tabela `refeicao`
 --
 ALTER TABLE `refeicao`
   MODIFY `id_refeicao` int(11) NOT NULL AUTO_INCREMENT;
-
---
--- AUTO_INCREMENT de tabela `sessao_treino`
---
-ALTER TABLE `sessao_treino`
-  MODIFY `id_sessao` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT de tabela `usuario`
@@ -583,9 +433,15 @@ ALTER TABLE `usuario`
   MODIFY `id_usuario` int(11) NOT NULL AUTO_INCREMENT;
 
 --
--- AUTO_INCREMENT de tabela `vinculo_profissional`
+-- AUTO_INCREMENT de tabela `vinculo_nutricional`
 --
-ALTER TABLE `vinculo_profissional`
+ALTER TABLE `vinculo_nutricional`
+  MODIFY `id_vinculo` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT de tabela `vinculo_treino`
+--
+ALTER TABLE `vinculo_treino`
   MODIFY `id_vinculo` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -600,13 +456,6 @@ ALTER TABLE `alimento_refeicao`
   ADD CONSTRAINT `alimento_refeicao_ibfk_2` FOREIGN KEY (`id_alimento`) REFERENCES `alimento` (`id_alimento`);
 
 --
--- Restrições para tabelas `comunicacao`
---
-ALTER TABLE `comunicacao`
-  ADD CONSTRAINT `comunicacao_ibfk_1` FOREIGN KEY (`id_remetente`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE,
-  ADD CONSTRAINT `comunicacao_ibfk_2` FOREIGN KEY (`id_destinatario`) REFERENCES `profissional` (`id_profissional`) ON DELETE CASCADE;
-
---
 -- Restrições para tabelas `diario_alimentar`
 --
 ALTER TABLE `diario_alimentar`
@@ -614,11 +463,11 @@ ALTER TABLE `diario_alimentar`
   ADD CONSTRAINT `diario_alimentar_ibfk_2` FOREIGN KEY (`id_plano_nutricional`) REFERENCES `plano_nutricional` (`id_plano_nutricional`);
 
 --
--- Restrições para tabelas `exercicio_treino`
+-- Restrições para tabelas `exercicios_do_treino`
 --
-ALTER TABLE `exercicio_treino`
-  ADD CONSTRAINT `exercicio_treino_ibfk_1` FOREIGN KEY (`id_treino`) REFERENCES `sessao_treino` (`id_sessao`),
-  ADD CONSTRAINT `exercicio_treino_ibfk_2` FOREIGN KEY (`id_exercicio`) REFERENCES `exercicio` (`id_exercicio`);
+ALTER TABLE `exercicios_do_treino`
+  ADD CONSTRAINT `exercicios_do_treino_ibfk_1` FOREIGN KEY (`id_treino`) REFERENCES `plano_treino` (`id_plano_treino`),
+  ADD CONSTRAINT `exercicios_do_treino_ibfk_2` FOREIGN KEY (`id_exercicio`) REFERENCES `exercicio` (`id_exercicio`);
 
 --
 -- Restrições para tabelas `metricas_usuario`
@@ -627,18 +476,29 @@ ALTER TABLE `metricas_usuario`
   ADD CONSTRAINT `metricas_usuario_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`);
 
 --
+-- Restrições para tabelas `nutricionista`
+--
+ALTER TABLE `nutricionista`
+  ADD CONSTRAINT `nutricionista_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE;
+
+--
+-- Restrições para tabelas `personal_trainer`
+--
+ALTER TABLE `personal_trainer`
+  ADD CONSTRAINT `personal_trainer_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE;
+
+--
 -- Restrições para tabelas `plano_nutricional`
 --
 ALTER TABLE `plano_nutricional`
-  ADD CONSTRAINT `plano_nutricional_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
-  ADD CONSTRAINT `plano_nutricional_ibfk_2` FOREIGN KEY (`id_profissional`) REFERENCES `profissional` (`id_profissional`);
+  ADD CONSTRAINT `plano_nutricional_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`);
 
 --
 -- Restrições para tabelas `plano_treino`
 --
 ALTER TABLE `plano_treino`
-  ADD CONSTRAINT `fk_plano_criador_profissional` FOREIGN KEY (`id_criador`) REFERENCES `profissional` (`id_profissional`) ON DELETE CASCADE ON UPDATE CASCADE,
-  ADD CONSTRAINT `fk_plano_criador_usuario` FOREIGN KEY (`id_criador`) REFERENCES `usuario` (`id_usuario`) ON DELETE CASCADE ON UPDATE CASCADE;
+  ADD CONSTRAINT `plano_treino_ibfk_1` FOREIGN KEY (`id_criador_usuario`) REFERENCES `usuario` (`id_usuario`),
+  ADD CONSTRAINT `plano_treino_ibfk_2` FOREIGN KEY (`id_criador_personal`) REFERENCES `personal_trainer` (`id_personal`);
 
 --
 -- Restrições para tabelas `refeicao`
@@ -647,17 +507,18 @@ ALTER TABLE `refeicao`
   ADD CONSTRAINT `refeicao_ibfk_1` FOREIGN KEY (`id_registro`) REFERENCES `diario_alimentar` (`id_registro`);
 
 --
--- Restrições para tabelas `sessao_treino`
+-- Restrições para tabelas `vinculo_nutricional`
 --
-ALTER TABLE `sessao_treino`
-  ADD CONSTRAINT `fk_sessao_treino` FOREIGN KEY (`id_treino`) REFERENCES `treino` (`id_treino`) ON DELETE CASCADE;
+ALTER TABLE `vinculo_nutricional`
+  ADD CONSTRAINT `vinculo_nutricional_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  ADD CONSTRAINT `vinculo_nutricional_ibfk_2` FOREIGN KEY (`id_nutricionista`) REFERENCES `nutricionista` (`id_nutricionista`);
 
 --
--- Restrições para tabelas `vinculo_profissional`
+-- Restrições para tabelas `vinculo_treino`
 --
-ALTER TABLE `vinculo_profissional`
-  ADD CONSTRAINT `vinculo_profissional_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
-  ADD CONSTRAINT `vinculo_profissional_ibfk_2` FOREIGN KEY (`id_profissional`) REFERENCES `profissional` (`id_profissional`);
+ALTER TABLE `vinculo_treino`
+  ADD CONSTRAINT `vinculo_treino_ibfk_1` FOREIGN KEY (`id_usuario`) REFERENCES `usuario` (`id_usuario`),
+  ADD CONSTRAINT `vinculo_treino_ibfk_2` FOREIGN KEY (`id_personal`) REFERENCES `personal_trainer` (`id_personal`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
