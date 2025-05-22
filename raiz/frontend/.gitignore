@@ -1,0 +1,33 @@
+# .gitignore
+# Dependências
+/node_modules
+
+# Ambiente
+.env*.local
+.env
+
+# Build
+/build
+/dist
+
+# Logs e configurações locais
+*.log
+*.env
+npm-debug.log*
+
+# IDE/Editor
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# Sistema
+.DS_Store
+
+# React
+/.eslintcache
+/.cache
+/coverage
