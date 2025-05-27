@@ -1,5 +1,9 @@
 import styled from 'styled-components';
+<<<<<<< HEAD
 import { AZUL, LARANJA, VERDE } from '../../Perfil/styles';
+=======
+import { AZUL, LARANJA, VERDE } from '../../PerfilUsuario/styles';
+>>>>>>> diogo
 
 export const NutritionSummary = styled.div`
   background: white;

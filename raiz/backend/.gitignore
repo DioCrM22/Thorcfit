@@ -1,0 +1,37 @@
+# Backend .gitignore (exemplo para Python/Flask)
+
+# Variáveis de ambiente
+.env
+*.env.local
+.env.production
+
+# Ambiente virtual Python
+venv/
+env/
+.venv/
+
+# Arquivos gerados pelo Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Dependências
+.python-version
+
+# Logs e databases
+*.log
+*.sqlite
+*.db
+
+# IDE/Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Arquivos de build/distribuição
+build/
+dist/
+*.egg-info/
+*.pyc

@@ -106,8 +106,13 @@ export default function Sidebar({ open, onClose }) {
           animate={{ x: 0 }}
           transition={{ duration: 0.3 }}
         >
+<<<<<<< HEAD
           <S.NavItem onClick={() => handleNavigate('/perfil')}>PERFIL</S.NavItem>
           <S.NavItem onClick={() => handleNavigate('/solicitar-amigo')}>ADICIONAR COMPANHEIROS</S.NavItem>
+=======
+          <S.NavItem onClick={() => handleNavigate('/perfil-profissional')}>PERFIL</S.NavItem>
+          <S.NavItem onClick={() => handleNavigate('/solicitar-alunos')}>ADICIONAR ALUNOS</S.NavItem>
+>>>>>>> diogo
           <S.NavItemExit onClick={logout}>SAIR</S.NavItemExit>
         </motion.div>
       </S.NavList>

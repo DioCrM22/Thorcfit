@@ -12,16 +12,6 @@ const colorChange = keyframes`
   100% { color: #ff7f00; transform: scale(1); text-transform: uppercase; }
 `;
 
-const popupFadeIn = keyframes`
-  from { opacity: 0; }
-  to { opacity: 1; }
-`;
-
-const popupContentSlide = keyframes`
-  from { transform: translateY(30px) scale(0.95); opacity: 0; }
-  to { transform: translateY(0) scale(1); opacity: 1; }
-`;
-
 /* ============ LAYOUT PRINCIPAL ============ */
 export const Container = styled.div`
   min-height: 100vh;
@@ -60,7 +50,7 @@ export const LogoIcon = styled.div`
 export const Title = styled.h2`
   font-family: "Golos Text", sans-serif;
   font-size: 1.4rem;
-  font-weight: 600;
+  font-weight: 800;
   color: rgb(42, 94, 236);
   text-align: center;
   margin-bottom: 10px;
@@ -118,6 +108,7 @@ export const ValidationItem = styled.div`
 /* ============ RODAPÉ ============ */
 export const FooterText = styled.p`
   text-align: center;
+  margin-top: 10px;
   font-size: 20px;
   color: black;
   font-weight: bold;
@@ -129,54 +120,137 @@ export const FooterText = styled.p`
   }
 `;
 
-export const ErrorMessage = styled.div`
-  background: #ffd4d4;
-  color: #c00;
-  padding: 10px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  text-align: center;
+/* ============ SELEÇÃO DE TIPO DE CONTA ============ */
+export const RoleSelectionContainer = styled.div`
+  margin: 20px 0;
+  border-radius: 15px;
+  overflow: hidden;
+  animation: ${fadeIn} 0.5s ease;
 `;
 
-/* ============ POPUP DE SUCESSO ============ */
-export const SuccessPopupOverlay = styled.div`
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.7);
+export const RoleSelectionTitle = styled.h3`
+  font-family: "Golos Text", sans-serif;
+  font-size: 1.5rem;
+  font-weight: 700;
+  text-align: center;
+  margin-bottom: 15px;
+  letter-spacing: 1px;
   display: flex;
   justify-content: center;
-  align-items: center;
-  z-index: 1000;
-  animation: ${popupFadeIn} 0.3s ease-out;
-`;
+  flex-wrap: wrap;
+  gap: 5px;
 
-export const SuccessPopupContent = styled.div`
-  background: white;
-  padding: 30px;
-  border-radius: 15px;
-  text-align: center;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
-  animation: ${popupContentSlide} 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-  transform-origin: center;
-`;
+  span.blue {
+    color: #2a5eec;
+    text-transform: none;
+  }
 
-export const SuccessPopupLogo = styled.div`
-  margin-bottom: 20px;
-  
-  img {
-    max-width: 150px;
-    height: auto;
+  span.orange {
+    color: #ff7f00;
+    display: inline-block;
+    animation: ${colorChange} 1.5s ease-in-out 2s 1 forwards;
+    text-transform: uppercase;
+  }
+
+  @media (max-width: 500px) {
+    font-size: 1.3rem;
   }
 `;
 
-export const SuccessPopupTitle = styled.h3`
-  font-size: 1.5rem;
-  color: #2a5eec;
+export const RoleOptionsGrid = styled.div`
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 10px;
   margin-bottom: 15px;
-  font-weight: 600;
+
+  @media (max-width: 430px) {
+    grid-template-columns: 1fr;
+  }
+`;
+
+export const RoleOption = styled.div`
+  border: 2px solid ${props => props.$selected ? '#2a5eec' : '#e0e0e0'};
+  border-radius: 10px;
+  padding: 15px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background-color: ${props => props.$selected ? '#f0f7ff' : 'white'};
+  text-align: center;
+  
+  &:hover {
+    border-color: #2a5eec;
+    transform: translateY(-3px);
+  }
+`;
+
+export const RoleIcon = styled.div`
+  font-size: 1.5rem;
+  margin-bottom: 8px;
+`;
+
+export const RoleName = styled.h4`
+  font-size: 0.9rem;
+  color: #333;
+  margin: 0;
+`;
+
+export const RoleDescription = styled.p`
+  display: none;
+  color: #666;
+  font-size: 0.8rem;
+  margin-top: 5px;
+`;
+
+export const Button = styled.button`
+  background-color: ${(props) => {
+    if (props.variant === "green") return "#2ecc71";
+    if (props.variant === "orange") return "#ff7f00";
+    return "#2a5eec";
+  }};
+  color: white;
+  border: none;
+  padding: 12px 20px;
+  border-radius: 8px;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  width: 100%;
+  margin-top: 10px;
+
+  &:hover {
+    background-color: ${(props) => {
+      if (props.variant === "green") return "#27ae60";
+      if (props.variant === "orange") return "#cc6500";
+      return "#1c4dc5";
+    }};
+  }
+`;
+
+/* ============ INFO DO TIPO DE CONTA ============ */
+
+export const InfoTooltip = styled.div`
+  background: #f0f7ff;
+  border: 2px solid #2a5eec;
+  border-radius: 12px;
+  padding: 15px;
+  margin-bottom: 10px;
+  color: #333;
+  line-height: 1.5;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  animation: fadeIn 0.3s ease;
+
+  div {
+    margin-bottom: 10px;
+  }
+
+  button {
+    color: #2a5eec;
+    border: none;
+    border-radius: 8px;
+    padding: 5px 10px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s ease;
+
+  }
 `;

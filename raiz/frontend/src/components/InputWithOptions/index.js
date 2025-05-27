@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
+<<<<<<< HEAD
 import { Label, Input, ErrorMessage } from '../../pages/Perfil/styles';
+=======
+import { Label, Input, ErrorMessage } from '../../pages/PerfilUsuario/styles';
+>>>>>>> diogo
 
 const InputContainer = styled.div`
   position: relative;
