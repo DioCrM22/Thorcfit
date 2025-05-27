@@ -85,25 +85,6 @@ export const TitleBar = styled.div`
   }
 `;
 
-
-export const Brand = styled.div`
-  font-size: 2rem;
-  font-weight: 800;
-  letter-spacing: 1px;
-
-  .azul {
-    color: ${AZUL};
-  }
-
-  .laranja {
-    color: ${LARANJA};
-  }
-
-  @media (max-width: 480px) {
-    font-size: 1.8rem;
-  }
-`;
-
 export const LogoIcon = styled.div`
   text-align: center;
   margin-bottom: 10px;

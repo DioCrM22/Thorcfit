@@ -25,7 +25,6 @@ import {
   ReviewContainer,
   ReviewItem,
   DatePickerWrapper,
-  Brand,
   ExerciseForm,
   SubmitButton,
   Separator,
@@ -353,10 +352,6 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
           <FiX />
         </SecondaryButton>
 
-        <Brand>
-          <span className="azul">THORC</span>
-          <span className="laranja">FIT</span>
-        </Brand>
       </TitleBar>
 
       <LogoIcon>

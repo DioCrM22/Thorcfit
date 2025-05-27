@@ -57,7 +57,7 @@ const colorChange = keyframes`
 
 export const Title = styled.h2`
   font-family: "Golos Text", sans-serif;
-  font-size: 1.4rem;
+  font-size: 1.9rem;
   font-weight: 600;
   color: rgb(42, 94, 236);
   text-align: center;
@@ -74,7 +74,7 @@ export const Title = styled.h2`
   }
 
   @media (max-width: 500px) {
-    font-size: 1.3rem;
+    font-size: 1.9rem;
   }
 `;
 
@@ -107,6 +107,7 @@ export const InfoMessage = styled.div`
 
 export const FooterText = styled.p`
   text-align: center;
+  padding: 5px;
   font-size: 18px;
   font-weight: bold;
   

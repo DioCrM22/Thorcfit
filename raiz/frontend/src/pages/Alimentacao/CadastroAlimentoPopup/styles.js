@@ -35,10 +35,10 @@ export const Overlay = styled.div`
 export const Modal = styled.div`
   background: white;
   border-radius: 16px;
-  padding: 1.5rem;
+  padding: 1rem;
   width: 90%;
   max-width: 420px;
-  max-height: 80vh;
+  max-height: 500px;
   overflow-y: auto;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
   animation: ${fadeIn} 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
@@ -61,6 +61,7 @@ export const Modal = styled.div`
   @media (max-width: 480px) {
     padding: 1.5rem;
     max-width: 95%;
+    max-height: 95%;
     border-radius: 12px;
   }
 `;
@@ -112,10 +113,10 @@ export const Header = styled.div`
 export const CloseButton = styled.button`
   background: none;
   border: none;
-  font-size: 1.8rem;
+  font-size: 2rem;
   cursor: pointer;
   color: ${AZUL};
-  padding: 0.5rem;
+  padding: 0.9rem;
   line-height: 1;
   transition: all 0.3s ease;
   display: flex;
@@ -143,7 +144,7 @@ export const Form = styled.form`
   flex-direction: column;
   align-items: center;
   width: 100%;
-  padding: 0 1rem;
+  padding: 0 0.5rem;
   box-sizing: border-box;
 `;
 
@@ -158,7 +159,7 @@ export const Label = styled.label`
   margin-bottom: 0.4rem;
   font-weight: 700;
   color: #444;
-  font-size: 0.85rem;
+  font-size: 1.3rem;
   letter-spacing: 0.5px;
   display: flex;
   align-items: center;
@@ -194,16 +195,16 @@ export const InputWrapper = styled.div`
 `;
 
 export const Input = styled.input`
-  padding: 1.2rem;
-  padding-right: ${props => props.hasUnit ? '2rem' : '0.5rem'};
+  padding: 1.5rem;
+  padding-right: ${props => props.hasUnit ? '3rem' : '0.5rem'};
   border-radius: 10px;
   border: 2px solid #e0e0e0;
-  font-size: 0.9rem;
+  font-size: 1.3rem;
   width: 100%;
   transition: all 0.3s ease;
-  font-weight: 500;
+  font-weight: 700;
   background: #f9f9f9;
-  height: 42px;
+  height: 15px;
 
   &:focus {
     outline: none;
@@ -222,8 +223,8 @@ export const Unit = styled.span`
   position: absolute;
   right: 1rem;
   color: #666; 
-  font-size: 0.8rem; 
-  font-weight: 500; 
+  font-size: 1.5rem; 
+  font-weight: 700; 
   pointer-events: none;
   background: transparent;
   padding: 0;

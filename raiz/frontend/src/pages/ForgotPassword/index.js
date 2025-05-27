@@ -74,7 +74,7 @@ const ForgotPassword = () => {
       if (errorMessage) {
         notify(`❌ ${errorMessage}`, "error");
         if (errorMessage.includes("não encontrado")) {
-          setEmail(""); // Limpa o campo se e-mail não existir
+          setEmail(""); 
         }
       } else {
         notify("✅ E-mail verificado. Você pode redefinir sua senha.", "success");
