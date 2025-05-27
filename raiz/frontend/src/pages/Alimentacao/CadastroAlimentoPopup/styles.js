@@ -1,11 +1,4 @@
 import styled, { keyframes } from 'styled-components';
-<<<<<<< HEAD
-import { AZUL, LARANJA } from '../../Perfil/styles';
-
-const fadeIn = keyframes`
-  from { opacity: 0; transform: translateY(-10px); }
-  to { opacity: 1; transform: translateY(0); }
-=======
 import { AZUL, LARANJA, VERDE } from '../../PerfilUsuario/styles';
 
 // Animations
@@ -23,7 +16,6 @@ const gradientBG = keyframes`
   0% { background-position: 0% 50%; }
   50% { background-position: 100% 50%; }
   100% { background-position: 0% 50%; }
->>>>>>> diogo
 `;
 
 export const Overlay = styled.div`
@@ -32,32 +24,16 @@ export const Overlay = styled.div`
   left: 0;
   width: 100vw;
   height: 100vh;
-<<<<<<< HEAD
-  background: rgba(0, 0, 0, 0.5);
-=======
   background: rgba(0, 0, 0, 0.6);
->>>>>>> diogo
   display: flex;
   justify-content: center;
   align-items: center;
   z-index: 1000;
-<<<<<<< HEAD
-=======
   backdrop-filter: blur(3px);
->>>>>>> diogo
 `;
 
 export const Modal = styled.div`
   background: white;
-<<<<<<< HEAD
-  border-radius: 12px;
-  padding: 2rem;
-  width: 90%;
-  max-width: 400px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-  animation: ${fadeIn} 0.3s ease-out;
-  font-family: 'Golos Text', sans-serif;
-=======
   border-radius: 16px;
   padding: 1.5rem;
   width: 90%;
@@ -87,16 +63,12 @@ export const Modal = styled.div`
     max-width: 95%;
     border-radius: 12px;
   }
->>>>>>> diogo
 `;
 
 export const Header = styled.div`
   display: flex;
   justify-content: space-between;
   align-items: center;
-<<<<<<< HEAD
-  margin-bottom: 1.5rem;
-=======
   margin-bottom: 1.8rem;
   position: relative;
   padding-bottom: 0.5rem;
@@ -110,18 +82,11 @@ export const Header = styled.div`
     height: 2px;
     background: linear-gradient(90deg, transparent, rgba(58, 134, 255, 0.3), transparent);
   }
->>>>>>> diogo
 
   h2 {
     margin: 0;
     color: ${LARANJA};
     font-family: 'Poppins', sans-serif;
-<<<<<<< HEAD
-    font-weight: 700;
-    font-size: 1.5rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-=======
     font-weight: 800;
     font-size: 1.6rem;
     text-transform: uppercase;
@@ -141,28 +106,17 @@ export const Header = styled.div`
       font-size: 1.3rem;
       letter-spacing: 0.5px;
     }
->>>>>>> diogo
   }
 `;
 
 export const CloseButton = styled.button`
   background: none;
   border: none;
-<<<<<<< HEAD
-  font-size: 1.5rem;
-=======
   font-size: 1.8rem;
->>>>>>> diogo
   cursor: pointer;
   color: ${AZUL};
   padding: 0.5rem;
   line-height: 1;
-<<<<<<< HEAD
-  transition: transform 0.2s ease;
-
-  &:hover {
-    transform: scale(1.1);
-=======
   transition: all 0.3s ease;
   display: flex;
   align-items: center;
@@ -181,37 +135,21 @@ export const CloseButton = styled.button`
     font-size: 1.5rem;
     width: 32px;
     height: 32px;
->>>>>>> diogo
   }
 `;
 
 export const Form = styled.form`
   display: flex;
   flex-direction: column;
-<<<<<<< HEAD
-=======
   align-items: center;
   width: 100%;
   padding: 0 1rem;
   box-sizing: border-box;
->>>>>>> diogo
 `;
 
 export const InputContainer = styled.div`
   display: flex;
   flex-direction: column;
-<<<<<<< HEAD
-  margin-bottom: 1.2rem;
-`;
-
-export const Label = styled.label`
-  margin-bottom: 0.5rem;
-  font-weight: 700;
-  color: #333;
-  font-size: 0.9rem;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-=======
   margin-bottom: 0.5rem;
   position: relative;
 `;
@@ -240,25 +178,12 @@ export const Label = styled.label`
     }}';
     font-size: 1.1rem;
   }
->>>>>>> diogo
 `;
 
 export const InputWrapper = styled.div`
   position: relative;
   display: flex;
   align-items: center;
-<<<<<<< HEAD
-`;
-
-export const Input = styled.input`
-  padding: 0.8rem;
-  padding-right: ${props => props.hasUnit ? '2.5rem' : '0.8rem'};
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  font-size: 1rem;
-  width: 100%;
-  transition: all 0.2s ease;
-=======
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
   border-radius: 10px;
   transition: all 0.3s ease;
@@ -279,14 +204,10 @@ export const Input = styled.input`
   font-weight: 500;
   background: #f9f9f9;
   height: 42px;
->>>>>>> diogo
 
   &:focus {
     outline: none;
     border-color: ${AZUL};
-<<<<<<< HEAD
-    box-shadow: 0 0 0 3px rgba(58, 134, 255, 0.1);
-=======
     box-shadow: 0 0 0 4px rgba(58, 134, 255, 0.2);
     background: white;
   }
@@ -294,18 +215,11 @@ export const Input = styled.input`
   &::placeholder {
     color: #aaa;
     font-weight: 400;
->>>>>>> diogo
   }
 `;
 
 export const Unit = styled.span`
   position: absolute;
-<<<<<<< HEAD
-  right: 0.8rem;
-  color: #777;
-  font-size: 0.9rem;
-  pointer-events: none;
-=======
   right: 1rem;
   color: #666; 
   font-size: 0.8rem; 
@@ -316,15 +230,10 @@ export const Unit = styled.span`
   display: flex;
   align-items: center;
   height: 100%;
->>>>>>> diogo
 `;
 
 export const ButtonContainer = styled.div`
   display: flex;
-<<<<<<< HEAD
-  gap: 1rem;
-  margin-top: 1.5rem;
-=======
   gap: 0.8rem;
   margin-top: 1.5rem;
   width: 100%;
@@ -336,30 +245,12 @@ export const ButtonContainer = styled.div`
     align-items: center;
     gap: 0.6rem;
   }
->>>>>>> diogo
 `;
 
 export const PrimaryButton = styled.button`
   background: ${AZUL};
   color: white;
   border: none;
-<<<<<<< HEAD
-  padding: 1rem;
-  border-radius: 8px;
-  font-weight: 700;
-  cursor: pointer;
-  font-size: 1rem;
-  transition: all 0.2s ease;
-  text-transform: uppercase;
-  flex: 1;
-
-  &:hover {
-    background: #2a75f5;
-  }
-
-  &:active {
-    transform: scale(0.98);
-=======
   padding: 0.6rem 1.2rem;
   border-radius: 8px;
   font-weight: 700;
@@ -392,33 +283,19 @@ export const PrimaryButton = styled.button`
 
   &:active {
     transform: translateY(0);
->>>>>>> diogo
   }
 `;
 
 export const SecondaryButton = styled.button`
   background: white;
-<<<<<<< HEAD
-  border: 2px solid ${AZUL};
-  color: ${AZUL};
-  font-weight: 700;
-  padding: 1rem;
-=======
   border: 2px solid ${LARANJA};
   color: ${LARANJA};
   font-weight: 700;
   padding: 0.6rem 1.2rem;
->>>>>>> diogo
   border-radius: 8px;
   cursor: pointer;
   transition: all 0.2s ease;
   text-transform: uppercase;
-<<<<<<< HEAD
-  flex: 1;
-
-  &:hover {
-    background: #f0f7ff;
-=======
   letter-spacing: 0.3px;
   min-width: 160px;
   text-align: center;
@@ -472,6 +349,5 @@ export const Bubble = styled.div`
   @keyframes float {
     0%, 100% { transform: translateY(0) rotate(0deg); }
     50% { transform: translateY(-20px) rotate(5deg); }
->>>>>>> diogo
   }
 `;

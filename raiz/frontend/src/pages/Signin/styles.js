@@ -170,36 +170,6 @@ export const SocialContainer = styled.div`
   margin-bottom: 15px;
 `;
 
-export const GoogleButton = styled.button`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: none;
-  padding: 16px 30px;
-  border-radius: 10px;
-  font-family: "Golos Text", sans-serif;
-  font-size: 18px;
-  font-weight: bold;
-  color: black;
-  width: 100%;
-  gap: 12px;
-  cursor: pointer;
-  transition: transform 0.3s ease, background 0.3s ease;
-
-  &:hover {
-    animation: ${hoverAnimation} 0.5s ease;
-  }
-
-  &:active {
-    transform: scale(0.98);
-  }
-
-  img {
-    width: 30px;
-    height: 30px;
-  }
-`;
-
 export const InstagramButton = styled.a`
   display: flex;
   align-items: center;

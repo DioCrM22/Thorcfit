@@ -1,8 +1,6 @@
 import React, { useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
 import { useNavigate } from "react-router-dom";
-import axios from 'axios'; 
-import { useGoogleLogin } from '@react-oauth/google';
 import { useNotification } from "../../contexts/NotificationContext";
 import Input from "../../components/Input";
 import Button from "../../components/Button";
@@ -18,7 +16,6 @@ import {
   DefaultLink,
   FooterText,
   Separator,
-  GoogleButton,
   InstagramButton,
 } from "./styles";
 
@@ -30,29 +27,6 @@ const Signin = () => {
   const { notify } = useNotification(); 
 
   const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-
-  const handleGoogleLogin = useGoogleLogin({
-    onSuccess: async (tokenResponse) => {
-      try {
-        const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-        
-        const { data } = await axios.post(
-          `${backendUrl}/api/google`, 
-          { token: tokenResponse.access_token }
-        );
-  
-        if (data.token) {
-          localStorage.setItem('authToken', data.token);
-          notify("Login com Google realizado!", "success");
-          navigate('/home');
-        }
-      } catch (err) {
-        console.error("Erro:", err.response?.data);
-        notify(err.response?.data?.error || "Falha no login com Google", "error");
-      }
-    },
-    onError: () => notify("Falha ao conectar com o Google", "error")
-  });
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -121,13 +95,6 @@ const Signin = () => {
         </div>
 
         <Button onClick={handleLogin}>🚀 Acessar Conta</Button>
-        
-        <SocialContainer>
-          <GoogleButton onClick={handleGoogleLogin}>
-            <img src="/assets/images/google.png" alt="Google" />
-            <FooterText>Entrar com Google</FooterText>
-          </GoogleButton>
-        </SocialContainer>
 
         <LinkText>
           Não tem conta? <DefaultLink to="/signup">💪 Crie agora!</DefaultLink>

@@ -1,27 +1,10 @@
-<<<<<<< HEAD
-=======
 // src/pages/Alimentacao/AddAlimentoPopup/index.js
->>>>>>> diogo
 import React, { useState, useEffect } from 'react';
 import * as S from './styles';
 import CadastroAlimentoPopup from '../CadastroAlimentoPopup';
 
 const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
   const [alimentos, setAlimentos] = useState([]);
-<<<<<<< HEAD
-  const [idAlimento, setIdAlimento] = useState('');
-  const [quantidade, setQuantidade] = useState('');
-  const [porcao, setPorcao] = useState('');
-  const [showCadastro, setShowCadastro] = useState(false);
-
-  useEffect(() => {
-    if (isOpen) {
-      fetch('/api/alimentos')
-        .then(res => res.json())
-        .then(data => setAlimentos(data))
-        .catch(err => console.error(err));
-    }
-=======
   const [selectedAlimento, setSelectedAlimento] = useState(null);
   const [quantidade, setQuantidade] = useState('');
   const [showCadastro, setShowCadastro] = useState(false);
@@ -34,26 +17,10 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
       { id_alimento: 3, nome: 'Frango', calorias: 165, proteinas: 31, carboidratos: 0, gorduras: 3.6 }
     ];
     setAlimentos(mockAlimentos);
->>>>>>> diogo
   }, [isOpen]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-<<<<<<< HEAD
-    fetch('/api/alimento_refeicao', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        id_refeicao: mealId,
-        id_alimento: idAlimento,
-        quantidade,
-        porcao
-      })
-    }).then(res => {
-      if (res.ok) onSave();
-      onClose();
-    });
-=======
     if (!selectedAlimento || !quantidade) return;
 
     const alimentoSelecionado = alimentos.find(a => a.id_alimento === parseInt(selectedAlimento));
@@ -68,25 +35,16 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
 
     onSave(newFood);
     onClose();
->>>>>>> diogo
   };
 
   const handleNovoAlimento = () => {
     setShowCadastro(true);
   };
 
-<<<<<<< HEAD
-  const handleAlimentoCadastrado = () => {
-    setShowCadastro(false);
-    fetch('/api/alimentos')
-      .then(res => res.json())
-      .then(data => setAlimentos(data));
-=======
   const handleAlimentoCadastrado = (newAlimento) => {
     setShowCadastro(false);
     setAlimentos(prev => [...prev, newAlimento]);
     setSelectedAlimento(newAlimento.id_alimento.toString());
->>>>>>> diogo
   };
 
   if (!isOpen) return null;
@@ -95,37 +53,6 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
     <>
       <S.Overlay>
         <S.Modal>
-<<<<<<< HEAD
-          <S.Header>
-            <h2>Adicionar Alimento</h2>
-            <button onClick={onClose}>✕</button>
-          </S.Header>
-          <S.Form onSubmit={handleSubmit}>
-            <label>Alimento</label>
-            <select value={idAlimento} onChange={e => setIdAlimento(e.target.value)} required>
-              <option value="">Selecione</option>
-              {alimentos.map((a) => (
-                <option key={a.id_alimento} value={a.id_alimento}>{a.nome}</option>
-              ))}
-            </select>
-
-            <label>Quantidade</label>
-            <input
-              type="number"
-              value={quantidade}
-              onChange={(e) => setQuantidade(e.target.value)}
-              required
-            />
-
-            <label>Porção</label>
-            <input
-              type="text"
-              value={porcao}
-              onChange={(e) => setPorcao(e.target.value)}
-              required
-            />
-
-=======
           <S.Bubble />
           <S.Bubble />
           
@@ -170,18 +97,13 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
               </S.InputContainer>
             </div>
             
->>>>>>> diogo
             <S.ButtonGroup>
               <S.SecondaryButton type="button" onClick={handleNovoAlimento}>
                 Cadastrar novo alimento
               </S.SecondaryButton>
-<<<<<<< HEAD
-              <S.SaveButton type="submit">Salvar</S.SaveButton>
-=======
               <S.PrimaryButton type="submit">
                 Adicionar
               </S.PrimaryButton>
->>>>>>> diogo
             </S.ButtonGroup>
           </S.Form>
         </S.Modal>
@@ -198,8 +120,4 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
   );
 };
 
-<<<<<<< HEAD
 export default AddAlimentoPopup;
-=======
-export default AddAlimentoPopup;
->>>>>>> diogo

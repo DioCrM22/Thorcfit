@@ -8,7 +8,7 @@ import Home from "./pages/Home"
 import PerfilUsuario from './pages/PerfilUsuario';
 import PerfilProfissional from './pages/PerfilProfissional';
 import SolicitarCompanheiros from './pages/SolicitarCompanheiros';
-import SolicitarAlunos from './pages/Treinadores/SolicitarAlunos';
+import SolicitarAlunos from './pages/SolicitarAlunos';
 import Treinos from './pages/Treinos';
 import VerTreinos from './pages/VerTreinos';
 import Nutricionistas from './pages/Nutricionistas';

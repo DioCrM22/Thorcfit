@@ -1,11 +1,3 @@
-<<<<<<< HEAD
-// EditarTreino/index.js atualizado
-import React, { useState } from 'react';
-import { FiPlus, FiTrash2, FiSave, FiX } from 'react-icons/fi';
-import {
-  Container,
-  Header,
-=======
 import React, { useState } from 'react';
 import { AnimatePresence } from 'framer-motion';
 import { FiPlus, FiX, FiChevronLeft, FiChevronRight, FiSend } from 'react-icons/fi';
@@ -13,7 +5,6 @@ import {
   Container,
   Header,
   LogoIcon,
->>>>>>> diogo
   WorkoutForm,
   FormGroup,
   Label,
@@ -26,20 +17,6 @@ import {
   ButtonGroup,
   PrimaryButton,
   SecondaryButton,
-<<<<<<< HEAD
-  DangerButton,
-  AddExerciseButton,
-  EmptyMessage,
-  TitleBar
-} from './styles';
-
-const EditarTreino = ({ userId, workoutId, onClose }) => {
-  const [workout, setWorkout] = useState({
-    nome: '',
-    objetivo: '',
-    observacoes: '',
-    exercicios: []
-=======
   AddExerciseButton,
   EmptyMessage,
   TitleBar,
@@ -77,21 +54,14 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
         carga_kg: 40
       }
     ]
->>>>>>> diogo
   });
 
   const [newExercise, setNewExercise] = useState({
     nome: '',
-<<<<<<< HEAD
-    series: 3,
-    repeticoes: 12,
-    carga: ''
-=======
     grupo_muscular: '',
     series: 3,
     repeticoes: 12,
     carga_kg: ''
->>>>>>> diogo
   });
 
   const handleInputChange = (e) => {
@@ -99,29 +69,6 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
     setWorkout(prev => ({ ...prev, [name]: value }));
   };
 
-<<<<<<< HEAD
-  const handleExerciseChange = (index, field, value) => {
-    const updatedExercises = [...workout.exercicios];
-    updatedExercises[index][field] = value;
-    setWorkout(prev => ({ ...prev, exercicios: updatedExercises }));
-  };
-
-  const handleAddExercise = () => {
-    if (!newExercise.nome) return;
-
-    setWorkout(prev => ({
-      ...prev,
-      exercicios: [...prev.exercicios, newExercise]
-    }));
-
-    setNewExercise({ nome: '', series: 3, repeticoes: 12, carga: '' });
-  };
-
-  const handleRemoveExercise = (index) => {
-    const updatedExercises = [...workout.exercicios];
-    updatedExercises.splice(index, 1);
-    setWorkout(prev => ({ ...prev, exercicios: updatedExercises }));
-=======
   const handleExerciseInputChange = (e) => {
     const { name, value } = e.target;
     setNewExercise(prev => ({ ...prev, [name]: value }));
@@ -142,17 +89,10 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
       repeticoes: 12,
       carga_kg: ''
     });
->>>>>>> diogo
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-<<<<<<< HEAD
-    console.log('Treino salvo:', workout);
-    onClose();
-  };
-
-=======
     console.log('Treino enviado:', workout);
     // Simulação de envio para o aluno
     alert(`Treino enviado com sucesso para o aluno!`);
@@ -402,7 +342,6 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
     }
   };
 
->>>>>>> diogo
   return (
     <Container
       initial={{ opacity: 0 }}
@@ -410,90 +349,6 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
       exit={{ opacity: 0 }}
     >
       <TitleBar>
-<<<<<<< HEAD
-        <img src="/assets/images/iconLogo.png" alt="Logo" />
-        <span>THORCFIT</span>
-      </TitleBar>
-
-      <Header>
-        <h2>{workoutId ? 'Editar Treino' : 'Novo Treino'}</h2>
-        <SecondaryButton onClick={onClose}><FiX /> Fechar</SecondaryButton>
-      </Header>
-
-      <WorkoutForm onSubmit={handleSubmit}>
-        <FormGroup>
-          <Label>Nome do Treino</Label>
-          <Input name="nome" value={workout.nome} onChange={handleInputChange} required />
-        </FormGroup>
-
-        <FormGroup>
-          <Label>Objetivo</Label>
-          <Input name="objetivo" value={workout.objetivo} onChange={handleInputChange} required />
-        </FormGroup>
-
-        <FormGroup>
-          <Label>Observações</Label>
-          <TextArea name="observacoes" value={workout.observacoes} onChange={handleInputChange} rows="3" />
-        </FormGroup>
-
-        <h3>Exercícios</h3>
-        {workout.exercicios.length === 0 ? (
-          <EmptyMessage>
-            <p>Nenhum exercício adicionado</p>
-          </EmptyMessage>
-        ) : (
-          <ExerciseList>
-            {workout.exercicios.map((exercise, index) => (
-              <ExerciseItem key={index}>
-                <ExerciseHeader>
-                  <h4>{exercise.nome}</h4>
-                  <DangerButton type="button" onClick={() => handleRemoveExercise(index)}><FiTrash2 /></DangerButton>
-                </ExerciseHeader>
-
-                <ExerciseContent>
-                  <FormGroup>
-                    <Label>Séries</Label>
-                    <Input type="number" min="1" value={exercise.series} onChange={(e) => handleExerciseChange(index, 'series', e.target.value)} />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>Repetições</Label>
-                    <Input type="number" min="1" value={exercise.repeticoes} onChange={(e) => handleExerciseChange(index, 'repeticoes', e.target.value)} />
-                  </FormGroup>
-                  <FormGroup>
-                    <Label>Carga</Label>
-                    <Input value={exercise.carga} onChange={(e) => handleExerciseChange(index, 'carga', e.target.value)} placeholder="Ex: 20kg" />
-                  </FormGroup>
-                </ExerciseContent>
-              </ExerciseItem>
-            ))}
-          </ExerciseList>
-        )}
-
-        <h4>Adicionar Exercício</h4>
-        <ExerciseContent>
-          <FormGroup>
-            <Label>Nome do Exercício</Label>
-            <Input value={newExercise.nome} onChange={(e) => setNewExercise({ ...newExercise, nome: e.target.value })} required />
-          </FormGroup>
-          <FormGroup>
-            <Label>Séries</Label>
-            <Input type="number" min="1" max="10" value={newExercise.series} onChange={(e) => setNewExercise({ ...newExercise, series: e.target.value })} required />
-          </FormGroup>
-          <FormGroup>
-            <Label>Repetições</Label>
-            <Input type="number" min="1" max="50" value={newExercise.repeticoes} onChange={(e) => setNewExercise({ ...newExercise, repeticoes: e.target.value })} required />
-          </FormGroup>
-          <FormGroup>
-            <Label>Carga</Label>
-            <Input value={newExercise.carga} onChange={(e) => setNewExercise({ ...newExercise, carga: e.target.value })} placeholder="Ex: 20kg" />
-          </FormGroup>
-        </ExerciseContent>
-
-        <AddExerciseButton type="button" onClick={handleAddExercise}><FiPlus /> Adicionar Exercício</AddExerciseButton>
-
-        <ButtonGroup>
-          <PrimaryButton type="submit"><FiSave /> Salvar Treino</PrimaryButton>
-=======
         <SecondaryButton onClick={onClose} className="fechar-btn">
           <FiX />
         </SecondaryButton>
@@ -533,15 +388,10 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
               Próximo <FiChevronRight />
             </PrimaryButton>
           ) : null}
->>>>>>> diogo
         </ButtonGroup>
       </WorkoutForm>
     </Container>
   );
 };
 
-<<<<<<< HEAD
 export default EditarTreino;
-=======
-export default EditarTreino;
->>>>>>> diogo

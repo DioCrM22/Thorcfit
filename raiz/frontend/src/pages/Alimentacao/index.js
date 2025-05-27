@@ -5,10 +5,7 @@ import { FiChevronLeft, FiChevronRight, FiPlus, FiMinus, FiCalendar } from 'reac
 import NavBar from '../../components/NavBar';
 import NutritionBars from './NutritionBars';
 import MealCard from './MealCard';
-<<<<<<< HEAD
-=======
 import AddAlimentoPopup from './AddAlimentoPopup';
->>>>>>> diogo
 import * as S from './styles';
 import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
@@ -18,27 +15,6 @@ const AlimentacaoPage = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [waterIntake, setWaterIntake] = useState(1500);
   const [showCalendar, setShowCalendar] = useState(false);
-<<<<<<< HEAD
-  const totalWaterGoal = 2500;
-
-  // Sample nutrition data
-  const dailyNutrition = {
-    calories: 1850,
-    targetCalories: 2200,
-    protein: 120,
-    carbs: 210,
-    fat: 65
-  };
-
-  const meals = [
-    {
-      id: 1,
-      name: 'Café da Manhã',
-      items: [
-        { name: 'Omelete', calories: 350, protein: 25, carbs: 2, fat: 28 },
-        { name: 'Pão Integral', calories: 160, protein: 8, carbs: 30, fat: 2 }
-      ]
-=======
   const [showAddFood, setShowAddFood] = useState(false);
   const [currentMeal, setCurrentMeal] = useState(null);
   const [meals, setMeals] = useState([
@@ -46,41 +22,22 @@ const AlimentacaoPage = () => {
       id: 1,
       name: 'Café da Manhã',
       items: []
->>>>>>> diogo
     },
     {
       id: 2,
       name: 'Almoço',
-<<<<<<< HEAD
-      items: [
-        { name: 'Arroz Integral', calories: 200, protein: 4, carbs: 44, fat: 1.5 },
-        { name: 'Frango Grelhado', calories: 165, protein: 31, carbs: 0, fat: 3.6 },
-        { name: 'Salada', calories: 50, protein: 2, carbs: 8, fat: 0 }
-      ]
-=======
       items: []
->>>>>>> diogo
     },
     {
       id: 3,
       name: 'Jantar',
-<<<<<<< HEAD
-      items: [
-        { name: 'Salmão', calories: 280, protein: 34, carbs: 0, fat: 15 },
-        { name: 'Brócolis', calories: 55, protein: 5, carbs: 11, fat: 0.6 }
-      ]
-=======
       items: []
->>>>>>> diogo
     },
     {
       id: 4,
       name: 'Ceia',
       items: []
     }
-<<<<<<< HEAD
-  ];
-=======
   ]);
 
   const totalWaterGoal = 2500;
@@ -92,7 +49,6 @@ const AlimentacaoPage = () => {
     carbs: meals.reduce((sum, meal) => sum + meal.items.reduce((s, item) => s + item.carbs, 0), 0),
     fat: meals.reduce((sum, meal) => sum + meal.items.reduce((s, item) => s + item.fat, 0), 0)
   };
->>>>>>> diogo
 
   const formatDate = (date) => {
     return date.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: '2-digit' });
@@ -111,22 +67,13 @@ const AlimentacaoPage = () => {
   };
 
   const handleWaterChange = (amount) => {
-<<<<<<< HEAD
-    setWaterIntake(prev => {
-      const newValue = Math.max(0, Math.min(totalWaterGoal, prev + amount));
-      return newValue;
-    });
-=======
     setWaterIntake(prev => Math.max(0, Math.min(totalWaterGoal, prev + amount)));
->>>>>>> diogo
   };
 
   const toggleCalendar = () => {
     setShowCalendar(!showCalendar);
   };
 
-<<<<<<< HEAD
-=======
   const handleAddFood = (mealId) => {
     setCurrentMeal(mealId);
     setShowAddFood(true);
@@ -149,7 +96,6 @@ const AlimentacaoPage = () => {
     ));
   };
 
->>>>>>> diogo
   return (
     <>
       <NavBar title="ALIMENTAÇÃO FIT" showBack onBack={() => navigate('/home')} />
@@ -157,38 +103,6 @@ const AlimentacaoPage = () => {
       <S.Container>
         {/* Seletor de Data */}
         <S.DaySelector>
-<<<<<<< HEAD
-            <S.DayButton onClick={() => changeDate(-1)}>
-              <FiChevronLeft size={20} />
-            </S.DayButton>
-
-            <S.CurrentDayContainer>
-              <S.CurrentDay>
-                {currentDate.toDateString() === new Date().toDateString() ? '🎯 Hoje' : 
-                currentDate.toDateString() === new Date(new Date().setDate(new Date().getDate() + 1)).toDateString() ? '⏭️ Amanhã' : 
-                formatDate(currentDate)}
-                
-                <S.CalendarButton onClick={toggleCalendar}>
-                  <FiCalendar size={18} />
-                </S.CalendarButton>
-                
-                {showCalendar && (
-                  <S.CalendarPopup>
-                    <Calendar 
-                      onChange={handleDateChange}
-                      value={currentDate}
-                      locale="pt-BR"
-                    />
-                  </S.CalendarPopup>
-                )}
-              </S.CurrentDay>
-            </S.CurrentDayContainer>
-
-            <S.DayButton onClick={() => changeDate(1)}>
-              <FiChevronRight size={20} />
-            </S.DayButton>
-          </S.DaySelector>
-=======
           <S.DayButton onClick={() => changeDate(-1)}>
             <FiChevronLeft size={20} />
           </S.DayButton>
@@ -219,83 +133,11 @@ const AlimentacaoPage = () => {
             <FiChevronRight size={20} />
           </S.DayButton>
         </S.DaySelector>
->>>>>>> diogo
 
         {/* Resumo Nutricional */}
         <NutritionBars nutrition={dailyNutrition} />
 
         {/* Hidratação */}
-<<<<<<< HEAD
-            <S.WaterTracker>
-              <S.WaterHeader>
-                <S.WaterTitle>💧 Hidratação Diária</S.WaterTitle>
-              </S.WaterHeader>
-              
-              <S.WaterContent>
-                <S.WaterGlassContainer>
-                  {/* Garrafa de consumo */}
-                  <S.WaterGlass>
-                    <S.WaterDrop top="10px" left="30%" />
-                    <S.WaterDrop top="20px" left="70%" />
-                    <S.GlassTop />
-                    <S.GlassBody>
-                      <S.WaterFill percentage={(waterIntake / totalWaterGoal) * 100}>
-                        <S.BottleCapacity inside percentage={(waterIntake / totalWaterGoal) * 100}>
-                          {(waterIntake / 1000).toFixed(1)}L
-                        </S.BottleCapacity>
-                      </S.WaterFill>
-                    </S.GlassBody>
-                    <S.GlassBottom />
-                    <S.WaterLabel>Seu consumo</S.WaterLabel>
-                  </S.WaterGlass>
-                  
-                  {/* Garrafa de meta */}
-                  <S.WaterGlass>
-                    <S.WaterDrop top="10px" left="40%" />
-                    <S.WaterDrop top="25px" left="60%" />
-                    <S.GlassTop />
-                    <S.GlassBody>
-                      <S.WaterFill percentage={100}>
-                        <S.BottleCapacity inside percentage={100}>
-                          {(totalWaterGoal / 1000).toFixed(1)}L
-                        </S.BottleCapacity>
-                      </S.WaterFill>
-                    </S.GlassBody>
-                    <S.GlassBottom />
-                    <S.WaterLabel>Meta diária</S.WaterLabel>
-                  </S.WaterGlass>
-                </S.WaterGlassContainer>
-                
-                <S.WaterControls>
-                  <S.WaterButton 
-                    onClick={() => handleWaterChange(-250)}
-                    disabled={waterIntake <= 0}
-                    aria-label="Remover água"
-                  >
-                    <FiMinus />
-                  </S.WaterButton>
-                  
-                  <S.WaterAmountControl>
-                    <span>250ml</span>
-                  </S.WaterAmountControl>
-                  
-                  <S.WaterButton 
-                    onClick={() => handleWaterChange(250)}
-                    disabled={waterIntake >= totalWaterGoal}
-                    aria-label="Adicionar água"
-                  >
-                    <FiPlus />
-                  </S.WaterButton>
-                </S.WaterControls>
-              </S.WaterContent>
-            </S.WaterTracker>
-
-        {/* Refeições */}
-        {meals.map(meal => (
-          <MealCard key={meal.id} meal={meal} />
-        ))}
-      </S.Container>
-=======
         <S.WaterTracker>
           <S.WaterHeader>
             <S.WaterTitle>💧 Hidratação Diária</S.WaterTitle>
@@ -378,7 +220,6 @@ const AlimentacaoPage = () => {
         onSave={handleSaveFood}
         mealId={currentMeal}
       />
->>>>>>> diogo
     </>
   );
 };

@@ -61,11 +61,7 @@ export const Title = styled.h1`
   font-family: "Golos Text", sans-serif;
   display: flex;
   justify-content: center;
-<<<<<<< HEAD
-  gap: 0; /* Removido o gap para juntar as letras */
-=======
   gap: 0;
->>>>>>> diogo
   margin: 40px 0 20px;
   width: 100%;
   position: relative;

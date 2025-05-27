@@ -1,11 +1,7 @@
 // src/pages/Alimentacao/styles.js
 import styled, { keyframes, css } from 'styled-components';
 import { darken } from 'polished';
-<<<<<<< HEAD
-import { AZUL, LARANJA } from '../Perfil/styles';
-=======
 import { AZUL, LARANJA } from '../PerfilUsuario/styles';
->>>>>>> diogo
 
 // Animations
 const fadeIn = keyframes`

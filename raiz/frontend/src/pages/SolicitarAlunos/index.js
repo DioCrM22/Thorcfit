@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FiUserPlus, FiUser, FiTrash2, FiX, FiCheck, FiFilter, FiPlus } from 'react-icons/fi';
-import NavBar from '../../../components/NavBar';
+import NavBar from '../../components/NavBar';
 import {
   Container,
   Header,

@@ -1,10 +1,6 @@
 // src/pages/Alimentacao/MealCard/styles.js
 import styled from 'styled-components';
-<<<<<<< HEAD
-import { LARANJA } from '../../Perfil/styles';
-=======
 import { LARANJA } from '../../PerfilUsuario/styles';
->>>>>>> diogo
 
 export const MealCardContainer = styled.div`
   background: white;
@@ -49,8 +45,6 @@ export const AddButton = styled.button`
   align-items: center;
   gap: 0.3rem;
   font-size: 0.9rem;
-<<<<<<< HEAD
-=======
   padding: 0.5rem;
   border-radius: 6px;
   transition: all 0.2s ease;
@@ -58,16 +52,12 @@ export const AddButton = styled.button`
   &:hover {
     background: #f0f7ff;
   }
->>>>>>> diogo
 `;
 
 export const MealContent = styled.div`
   display: flex;
   flex-direction: column;
-<<<<<<< HEAD
-=======
   gap: 1rem;
->>>>>>> diogo
 `;
 
 export const EmptyMeal = styled.div`
@@ -76,8 +66,6 @@ export const EmptyMeal = styled.div`
   color: #6c757d;
   font-style: italic;
 `;
-<<<<<<< HEAD
-=======
 
 export const FoodItem = styled.div`
   padding: 0.8rem;
@@ -110,4 +98,3 @@ export const RemoveButton = styled.button`
     background: rgba(220, 53, 69, 0.1);
   }
 `;
->>>>>>> diogo

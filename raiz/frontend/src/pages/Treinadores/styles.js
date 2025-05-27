@@ -4,10 +4,7 @@ import { motion } from 'framer-motion';
 const AZUL = '#3a86ff';
 const VERDE = '#35eb21';
 const CINZA = '#666';
-<<<<<<< HEAD
-=======
 const VERMELHO = '#ff4444';
->>>>>>> diogo
 
 export const PageContainer = styled.div`
   display: flex;
@@ -108,10 +105,7 @@ export const ProfessionalList = styled.div`
   display: flex;
   flex-direction: column;
   gap: 20px;
-<<<<<<< HEAD
-=======
   position: relative;
->>>>>>> diogo
   
   @media (max-width: 480px) {
     gap: 15px;
@@ -126,10 +120,7 @@ export const ProfessionalCard = styled.div`
   gap: 25px;
   align-items: center;
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-<<<<<<< HEAD
-=======
   position: relative;
->>>>>>> diogo
   
   @media (max-width: 768px) {
     padding: 20px;
@@ -340,8 +331,6 @@ export const HistoryItem = styled.div`
     }
   }
 `;
-<<<<<<< HEAD
-=======
 
 export const DeleteButton = styled(motion.button)`
   position: absolute;
@@ -369,4 +358,3 @@ export const DeleteButton = styled(motion.button)`
     height: 28px;
   }
 `;
->>>>>>> diogo

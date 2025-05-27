@@ -4,14 +4,6 @@ import { motion } from 'framer-motion';
 const AZUL = '#3a86ff';
 const VERDE = '#35eb21';
 const CINZA = '#666';
-<<<<<<< HEAD
-
-export const Container = styled(motion.div)`
-  max-width: 800px;
-  margin: 0 auto;
-  padding: 20px;
-  min-height: 100vh;
-=======
 const VERMELHO = '#ff4444';
 
 export const PageContainer = styled.div`
@@ -28,26 +20,20 @@ export const MainContent = styled(motion.div)`
   max-width: 800px;
   margin: 0 auto;
   padding: 20px;
->>>>>>> diogo
   font-family: 'Golos Text', sans-serif;
   
   * {
     font-family: 'Golos Text', sans-serif;
   }
-<<<<<<< HEAD
-=======
   
   @media (max-width: 768px) {
     padding: 10px;
     max-width: 100%;
   }
->>>>>>> diogo
 `;
 
 export const Header = styled.header`
   margin-bottom: 30px;
-<<<<<<< HEAD
-=======
   
   @media (max-width: 480px) {
     margin-bottom: 60px;
@@ -80,7 +66,6 @@ export const SectionTitle = styled.h2`
   .highlight {
     color: #FF6B35;
   }
->>>>>>> diogo
 `;
 
 export const SearchContainer = styled.div`
@@ -92,14 +77,11 @@ export const SearchContainer = styled.div`
   border-radius: 10px;
   margin-bottom: 30px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-<<<<<<< HEAD
-=======
   
   @media (max-width: 480px) {
     padding: 8px 15px;
     margin-bottom: 20px;
   }
->>>>>>> diogo
 `;
 
 export const SearchInput = styled.input`
@@ -112,41 +94,27 @@ export const SearchInput = styled.input`
   &:focus {
     outline: none;
   }
-<<<<<<< HEAD
-=======
   
   @media (max-width: 480px) {
     padding: 8px;
     font-size: 14px;
   }
->>>>>>> diogo
 `;
 
 export const ProfessionalList = styled.div`
   display: flex;
   flex-direction: column;
-<<<<<<< HEAD
-  gap: 15px;
-=======
   gap: 20px;
   position: relative;
   
   @media (max-width: 480px) {
     gap: 15px;
   }
->>>>>>> diogo
 `;
 
 export const ProfessionalCard = styled.div`
   background: #fff;
   border-radius: 12px;
-<<<<<<< HEAD
-  padding: 20px;
-  display: flex;
-  gap: 20px;
-  align-items: center;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-=======
   padding: 25px;
   display: flex;
   gap: 25px;
@@ -158,27 +126,16 @@ export const ProfessionalCard = styled.div`
     padding: 20px;
     gap: 20px;
   }
->>>>>>> diogo
   
   @media (max-width: 480px) {
     flex-direction: column;
     text-align: center;
-<<<<<<< HEAD
-=======
     padding: 15px;
     gap: 15px;
->>>>>>> diogo
   }
 `;
 
 export const UserImage = styled.img`
-<<<<<<< HEAD
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 2px solid ${AZUL};
-=======
   width: 90px;
   height: 90px;
   border-radius: 50%;
@@ -189,7 +146,6 @@ export const UserImage = styled.img`
     width: 80px;
     height: 80px;
   }
->>>>>>> diogo
 `;
 
 export const UserInfo = styled.div`
@@ -208,17 +164,6 @@ export const UserInfo = styled.div`
   }
   
   .status {
-<<<<<<< HEAD
-    margin-top: 10px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    
-    .badge {
-      padding: 4px 12px;
-      border-radius: 20px;
-      font-size: 12px;
-=======
     margin-top: 12px;
     display: flex;
     gap: 15px;
@@ -230,7 +175,6 @@ export const UserInfo = styled.div`
       border-radius: 20px;
       font-size: 13px;
       font-weight: 500;
->>>>>>> diogo
       
       &.ativo {
         background: ${VERDE}20;
@@ -242,14 +186,11 @@ export const UserInfo = styled.div`
         color: #ff4444;
       }
     }
-<<<<<<< HEAD
-=======
     
     @media (max-width: 480px) {
       justify-content: center;
       gap: 10px;
     }
->>>>>>> diogo
   }
 `;
 
@@ -266,11 +207,7 @@ export const ActionGroup = styled.div`
 `;
 
 export const PlanButton = styled(motion.button)`
-<<<<<<< HEAD
-  padding: 10px 20px;
-=======
   padding: 12px 24px;
->>>>>>> diogo
   border: none;
   border-radius: 8px;
   background: ${AZUL};
@@ -280,8 +217,6 @@ export const PlanButton = styled(motion.button)`
   gap: 8px;
   cursor: pointer;
   font-size: 14px;
-<<<<<<< HEAD
-=======
   font-weight: 500;
   white-space: nowrap;
   
@@ -290,22 +225,15 @@ export const PlanButton = styled(motion.button)`
     font-size: 13px;
     justify-content: center;
   }
->>>>>>> diogo
 `;
 
 export const EmptyMessage = styled.div`
   text-align: center;
-<<<<<<< HEAD
-  padding: 40px 20px;
-=======
   padding: 60px 20px;
->>>>>>> diogo
   color: ${CINZA};
   
   p {
     margin-top: 15px;
-<<<<<<< HEAD
-=======
     font-size: 16px;
   }
   
@@ -428,6 +356,5 @@ export const DeleteButton = styled(motion.button)`
     right: 10px;
     width: 28px;
     height: 28px;
->>>>>>> diogo
   }
 `;
