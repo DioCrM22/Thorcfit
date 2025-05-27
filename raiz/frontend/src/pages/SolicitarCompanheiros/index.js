@@ -164,9 +164,9 @@ export default function AmigosPage() {
                   <UserImage src={user.foto_perfil} alt={user.nome} />
                   
                   <UserInfo>
-                    <h4>{user.nome}</h4>
-                    <p>{user.email}</p>
-                    <p>{user.telefone}</p>
+                    <h4>👤 {user.nome}</h4>
+                    <p>📧 {user.email}</p>
+                    <p>📱 {user.telefone}</p>
                     <p>{user.tipo}</p>
                   </UserInfo>
 

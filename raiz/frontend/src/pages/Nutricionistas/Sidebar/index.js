@@ -107,7 +107,7 @@ export default function Sidebar({ open, onClose }) {
           transition={{ duration: 0.3 }}
         >
           <S.NavItem onClick={() => handleNavigate('/perfil-profissional')}>PERFIL</S.NavItem>
-          <S.NavItem onClick={() => handleNavigate('/solicitar-alunos')}>ADICIONAR ALUNOS</S.NavItem>
+          <S.NavItem onClick={() => handleNavigate('/solicitar-alunos')}>ADICIONAR PACIENTES</S.NavItem>
           <S.NavItemExit onClick={logout}>SAIR</S.NavItemExit>
         </motion.div>
       </S.NavList>

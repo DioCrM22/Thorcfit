@@ -216,7 +216,7 @@ const ProfilePage = () => {
     <Container>
       <Header>
         <NavBar 
-          title="PERFIL FIT"
+          title="THORC FIT"
           showBack={true}
           showMenu={false}
           onBack={() => navigate('/HOME')}
@@ -408,7 +408,7 @@ const ProfilePage = () => {
         {isEditing && (
             <div style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', gap: '1rem', }}>
               <PasswordButton to="/forgot-password">
-                🔑 Alterar Senha
+                🔐 Alterar Senha
               </PasswordButton>
 
               <div style={{ display: 'flex', gap: '1rem' }}>

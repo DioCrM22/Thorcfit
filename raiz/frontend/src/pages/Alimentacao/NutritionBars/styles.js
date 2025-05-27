@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { AZUL, LARANJA, VERDE } from '../../Perfil/styles';
+import { AZUL, LARANJA, VERDE } from '../../PerfilUsuario/styles';
 
 export const NutritionSummary = styled.div`
   background: white;

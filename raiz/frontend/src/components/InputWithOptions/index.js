@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import styled from 'styled-components';
-import { Label, Input, ErrorMessage } from '../../pages/Perfil/styles';
+import { Label, Input, ErrorMessage } from '../../pages/PerfilUsuario/styles';
 
 const InputContainer = styled.div`
   position: relative;

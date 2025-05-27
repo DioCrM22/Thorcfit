@@ -1,7 +1,7 @@
 // src/pages/Alimentacao/styles.js
 import styled, { keyframes, css } from 'styled-components';
 import { darken } from 'polished';
-import { AZUL, LARANJA } from '../Perfil/styles';
+import { AZUL, LARANJA } from '../PerfilUsuario/styles';
 
 // Animations
 const fadeIn = keyframes`
