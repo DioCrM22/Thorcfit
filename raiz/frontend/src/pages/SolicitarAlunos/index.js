@@ -134,7 +134,7 @@ export default function GerenciarAlunos() {
       <Header>
         <NavBarContainer>
           <NavBar 
-            title="MEUS ALUNOS"
+            title="THORC FIT"
             showBack={true}
             showMenu={false}
             onBack={() => navigate(-1)}
@@ -158,7 +158,7 @@ export default function GerenciarAlunos() {
         <SearchContainer>
           <SearchInput
             type="text"
-            placeholder="🔍 Buscar por nome ou e-mail..."
+            placeholder="🔍 Buscar por aluno por e-mail..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />

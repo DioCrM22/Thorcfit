@@ -245,8 +245,8 @@ export const ExerciseHeader = styled.div`
 
 export const ExerciseContent = styled.div`
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-  gap: 15px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 25px;
   margin-top: 15px;
 
   div {
@@ -292,6 +292,25 @@ export const ExerciseControls = styled.div`
     svg {
       width: 16px;
       height: 16px;
+    }
+  }
+`;
+
+export const ExerciseRow = styled.div`
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px;
+  margin-bottom: 15px;
+
+  &:last-child {
+    grid-template-columns: 1fr 1fr 1fr;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+    
+    &:last-child {
+      grid-template-columns: 1fr;
     }
   }
 `;
@@ -480,7 +499,7 @@ export const Step = styled.div`
 export const ReviewContainer = styled.div`
   background: #f9f9f9;
   border-radius: 12px;
-  padding: 25px;
+  padding: 20px;
   margin-bottom: 25px;
   border: 1px solid #eee;
 
@@ -504,6 +523,7 @@ export const ReviewContainer = styled.div`
 
 export const ReviewItem = styled.div`
   display: flex;
+  flex-direction: column;
   margin-bottom: 15px;
   padding-bottom: 15px;
   border-bottom: 1px solid #f0f0f0;
@@ -511,20 +531,15 @@ export const ReviewItem = styled.div`
   strong {
     font-weight: 600;
     color: ${CINZA_ESCURO};
-    min-width: 120px;
+    margin-bottom: 5px;
+    display: block;
   }
 
   span {
     color: ${CINZA};
-    flex: 1;
-  }
-
-  @media (max-width: 480px) {
-    flex-direction: column;
-    gap: 5px;
-
-    strong {
-      min-width: auto;
-    }
+    word-break: break-word;
+    white-space: pre-wrap;
+    line-height: 1.5;
   }
 `;
+

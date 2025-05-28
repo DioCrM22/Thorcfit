@@ -141,7 +141,7 @@ const ForgotPassword = () => {
         </FormBox>
       </Container>
 
-      <Popup show={showPopup} onClose={() => setShowPopup(false)}>
+      <Popup show={showPopup} onClose={() => setShowPopup(false)} style={{width: '90%', maxWidth: '500px', padding: '20px','@media (max-width: 480px)': { padding: '15px', }}}>
         <LogoIcon>
           <img src="/assets/images/LogoForte.png" alt="Logo" />
         </LogoIcon>
@@ -160,7 +160,7 @@ const ForgotPassword = () => {
           }}
         />
 
-        <div style={{ marginTop: "10px", fontSize: "0.9rem" }}>
+        <div style={{  marginTop: "10px", fontSize: "0.9rem",'@media (max-width: 480px)': { fontSize: '0.8rem'} }}>
           {firstMissing() ? (
             <ValidationItem>✗ {firstMissing()}</ValidationItem>
           ) : (

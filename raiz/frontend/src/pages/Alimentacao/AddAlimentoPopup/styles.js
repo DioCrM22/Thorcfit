@@ -7,12 +7,6 @@ const fadeIn = keyframes`
   to { opacity: 1; transform: translateY(0) scale(1); }
 `;
 
-const pulse = keyframes`
-  0% { transform: scale(1); }
-  50% { transform: scale(1.05); }
-  100% { transform: scale(1); }
-`;
-
 const bounce = keyframes`
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-5px); }
@@ -251,10 +245,10 @@ export const ButtonGroup = styled.div`
   display: flex;
   gap: 1rem;
   margin-top: 1.5rem;
-  flex-direction: column;
-
-  @media (min-width: 480px) {
-    flex-direction: row;
+  
+  @media (max-width: 768px) {
+    flex-direction: column;
+    gap: 0.8rem;
   }
 `;
 
@@ -262,41 +256,28 @@ export const PrimaryButton = styled.button`
   background: ${VERDE};
   color: white;
   border: none;
-  padding: 1.1rem;
+  padding: 0.9rem 1.5rem;
   border-radius: 10px;
-  font-weight: 800;
+  font-weight: 700;
+  font-size: 0.95rem;
   cursor: pointer;
-  font-size: 1rem;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 4px 10px rgba(58, 134, 255, 0.3);
-  position: relative;
-  overflow: hidden;
-
-  &::before {
-    content: '🍽️';
-    font-size: 1.2rem;
-  }
-
+  min-width: 120px;
+  
   &:hover {
     background: ${AZUL};
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(58, 134, 255, 0.4);
-    animation: ${pulse} 1s ease infinite;
+    box-shadow: 0 4px 12px rgba(58, 134, 255, 0.3);
   }
 
-  &:active {
-    transform: translateY(0);
-  }
-
-  @media (max-width: 480px) {
-    padding: 1rem;
+  @media (max-width: 768px) {
+    padding: 0.8rem;
+    font-size: 0.9rem;
   }
 `;
 
@@ -304,37 +285,27 @@ export const SecondaryButton = styled.button`
   background: white;
   border: 2px solid ${AZUL};
   color: ${AZUL};
-  font-weight: 800;
-  padding: 1.1rem;
+  padding: 0.9rem 1.5rem;
   border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.3s ease;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  box-shadow: 0 4px 10px rgba(255, 107, 0, 0.1);
-
-  &::before {
-    content: '📝';
-    font-size: 1.1rem;
-  }
-
+  min-width: 120px;
+  
   &:hover {
-    background: rgba(255, 107, 0, 0.1);
+    background: rgba(58, 134, 255, 0.1);
     transform: translateY(-2px);
-    box-shadow: 0 6px 15px rgba(255, 107, 0, 0.2);
   }
 
-  &:active {
-    transform: translateY(0);
-  }
-
-  @media (max-width: 480px) {
-    padding: 1rem;
+  @media (max-width: 768px) {
+    padding: 0.8rem;
+    font-size: 0.9rem;
   }
 `;
 

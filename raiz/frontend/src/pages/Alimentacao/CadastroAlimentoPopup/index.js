@@ -3,28 +3,28 @@ import * as S from './styles';
 
 const CadastroAlimentoPopup = ({ isOpen, onClose, onSave }) => {
   const [form, setForm] = useState({
-    nome: '', 
-    calorias: '', 
-    proteinas: '', 
-    carboidratos: '', 
-    gorduras: '', 
-    porcao_padrao: ''
+    nome: '',
+    calorias: '',
+    proteinas: '',
+    carboidratos: '',
+    gorduras: '',
+    porcao_padrao: '',
   });
 
   const fieldConfigs = {
-    nome: { label: 'Nome do Alimento', type: 'text', unit: '' },
-    calorias: { label: 'Calorias', type: 'number', unit: 'kcal' },
-    proteinas: { label: 'Proteínas', type: 'number', unit: 'g' },
-    carboidratos: { label: 'Carboidratos', type: 'number', unit: 'g' },
-    gorduras: { label: 'Gorduras', type: 'number', unit: 'g' },
-    porcao_padrao: { label: 'Porção Padrão', type: 'text', unit: '' }
+    nome: { label: 'Nome do Alimento', type: 'text', unit: '', placeholder: 'Ex.: Arroz branco' },
+    calorias: { label: 'Calorias', type: 'number', unit: 'kcal', placeholder: 'Ex.: 130' },
+    proteinas: { label: 'Proteínas', type: 'number', unit: 'g', placeholder: 'Ex.: 2.5' },
+    carboidratos: { label: 'Carboidratos', type: 'number', unit: 'g', placeholder: 'Ex.: 28' },
+    gorduras: { label: 'Gorduras', type: 'number', unit: 'g', placeholder: 'Ex.: 0.3' },
+    porcao_padrao: { label: 'Porção Padrão', type: 'text', unit: '', placeholder: 'Ex.: 100g' },
   };
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = e => {
+  const handleSubmit = (e) => {
     e.preventDefault();
     onSave(form);
     onClose();
@@ -32,50 +32,46 @@ const CadastroAlimentoPopup = ({ isOpen, onClose, onSave }) => {
 
   if (!isOpen) return null;
 
- return (
+  return (
     <S.Overlay>
       <S.Modal>
         <S.Bubble />
         <S.Bubble />
-        
+
         <S.Header>
           <h2>Cadastrar Alimento</h2>
           <S.CloseButton onClick={onClose}>✕</S.CloseButton>
         </S.Header>
-        
-        <S.Form onSubmit={handleSubmit}>
-          <div style={{ maxHeight: '30vh', overflowY: 'auto', paddingRight: '5px' }}>
+
+        <S.Content>
+          <S.Form onSubmit={handleSubmit}>
             {Object.entries(fieldConfigs).map(([field, config]) => (
-              <S.InputContainer key={field}>
+              <S.InputGroup key={field}>
                 <S.Label htmlFor={field}>{config.label}</S.Label>
                 <S.InputWrapper>
                   <S.Input
-                    type={config.type}
                     id={field}
                     name={field}
+                    type={config.type}
                     value={form[field]}
                     onChange={handleChange}
-                    required
-                    min={config.type === 'number' ? '0' : undefined}
-                    step={field === 'calorias' ? '1' : '0.1'}
-                    hasUnit={!!config.unit}
-                    placeholder={`Digite ${config.label.toLowerCase()}`}
+                    placeholder={config.placeholder}
                   />
                   {config.unit && <S.Unit>{config.unit}</S.Unit>}
                 </S.InputWrapper>
-              </S.InputContainer>
+              </S.InputGroup>
             ))}
-          </div>
-          
-          <S.ButtonContainer>
-            <S.SecondaryButton type="button" onClick={onClose}>
-              Cancelar
-            </S.SecondaryButton>
-            <S.PrimaryButton type="submit">
-              Salvar Alimento
-            </S.PrimaryButton>
-          </S.ButtonContainer>
-        </S.Form>
+
+            <S.ButtonContainer>
+              <S.SecondaryButton type="button" onClick={onClose}>
+                Cancelar
+              </S.SecondaryButton>
+              <S.PrimaryButton type="submit">
+                Salvar
+              </S.PrimaryButton>
+            </S.ButtonContainer>
+          </S.Form>
+        </S.Content>
       </S.Modal>
     </S.Overlay>
   );

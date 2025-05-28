@@ -90,7 +90,7 @@ export default function AmigosPage() {
     >
       <Header>
         <NavBar 
-        title="AMIGOS FIT"
+        title="THORC FIT"
         showBack={true}
         showMenu={false}
         onBack={() => navigate('/home')}

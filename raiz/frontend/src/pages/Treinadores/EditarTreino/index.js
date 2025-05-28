@@ -14,6 +14,7 @@ import {
   ExerciseItem,
   ExerciseHeader,
   ExerciseContent,
+  ExerciseRow,
   ButtonGroup,
   PrimaryButton,
   SecondaryButton,
@@ -33,35 +34,41 @@ import {
 const EditarTreino = ({ userId, workoutId, onClose }) => {
   const [step, setStep] = useState(1);
   const [workout, setWorkout] = useState({
-    nome: 'Treino de Hipertrofia',
-    objetivo: 'Ganho de massa muscular',
-    observacoes: 'Focar na execução correta dos movimentos',
-    data_criacao: new Date().toISOString().split('T')[0],
-    exercicios: [
-      {
-        nome: 'Supino Reto',
-        grupo_muscular: 'Peito',
-        series: 4,
-        repeticoes: 10,
-        carga_kg: 30
-      },
-      {
-        nome: 'Agachamento Livre',
-        grupo_muscular: 'Pernas',
-        series: 4,
-        repeticoes: 12,
-        carga_kg: 40
-      }
-    ]
-  });
+  nome: 'Treino de Hipertrofia',
+  objetivo: 'Ganho de massa muscular',
+  observacoes: 'Focar na execução correta movimentos',
+  data_criacao: new Date().toISOString().split('T')[0],
+  exercicios: [
+    {
+      nome: 'Supino Reto',
+      grupo_muscular: 'Peito',
+      series: 4,
+      repeticoes: 10,
+      carga_kg: 30,
+      equipamento: 'Barra olímpica',
+      descanso_segundos: 60
+    },
+    {
+      nome: 'Agachamento Livre',
+      grupo_muscular: 'Pernas',
+      series: 4,
+      repeticoes: 12,
+      carga_kg: 40,
+      equipamento: 'Barra',
+      descanso_segundos: 90
+    }
+  ]
+});
 
   const [newExercise, setNewExercise] = useState({
-    nome: '',
-    grupo_muscular: '',
-    series: 3,
-    repeticoes: 12,
-    carga_kg: ''
-  });
+  nome: '',
+  grupo_muscular: '',
+  series: 3,
+  repeticoes: 12,
+  carga_kg: '',
+  equipamento: '',
+  descanso_segundos: 60
+});
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -82,11 +89,13 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
     }));
 
     setNewExercise({
-      nome: '',
-      grupo_muscular: '',
-      series: 3,
-      repeticoes: 12,
-      carga_kg: ''
+    nome: '',
+    grupo_muscular: '',
+    series: 3,
+    repeticoes: 12,
+    carga_kg: '',
+    equipamento: '',
+    descanso_segundos: 60
     });
   };
 
@@ -175,7 +184,33 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
                 />
               </FormGroup>
 
-              <ExerciseContent>
+              {/* Linha superior - Carga e Equipamento */}
+              <ExerciseRow>
+                <FormGroup>
+                  <Label>Carga (kg)</Label>
+                  <Input 
+                    type="number" 
+                    min="0" 
+                    step="0.5"
+                    name="carga_kg" 
+                    value={newExercise.carga_kg} 
+                    onChange={handleExerciseInputChange} 
+                    placeholder="0"
+                  />
+                </FormGroup>
+                <FormGroup>
+                  <Label>Equipamento (opcional)</Label>
+                  <Input 
+                    name="equipamento" 
+                    value={newExercise.equipamento} 
+                    onChange={handleExerciseInputChange} 
+                    placeholder="Ex: Barra, Halteres"
+                  />
+                </FormGroup>
+              </ExerciseRow>
+
+              {/* Linha inferior - Séries, Repetições e Descanso */}
+              <ExerciseRow>
                 <FormGroup>
                   <Label>Séries</Label>
                   <Input 
@@ -199,18 +234,17 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
                   />
                 </FormGroup>
                 <FormGroup>
-                  <Label>Carga (kg)</Label>
+                  <Label>Descanso (seg)</Label>
                   <Input 
                     type="number" 
                     min="0" 
-                    step="0.5"
-                    name="carga_kg" 
-                    value={newExercise.carga_kg} 
+                    name="descanso_segundos" 
+                    value={newExercise.descanso_segundos} 
                     onChange={handleExerciseInputChange} 
-                    placeholder="0"
+                    required 
                   />
                 </FormGroup>
-              </ExerciseContent>
+              </ExerciseRow>
 
               <AddExerciseButton 
                 type="button" 
@@ -247,13 +281,21 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
 
                       <ExerciseContent>
                         <div>
+                          <strong>Carga:</strong> {exercise.carga_kg || '0'} kg
+                        </div>
+                        {exercise.equipamento && (
+                          <div>
+                            <strong>Equipamento:</strong> {exercise.equipamento}
+                          </div>
+                        )}
+                        <div>
                           <strong>Séries:</strong> {exercise.series}
                         </div>
                         <div>
                           <strong>Repetições:</strong> {exercise.repeticoes}
                         </div>
                         <div>
-                          <strong>Carga:</strong> {exercise.carga_kg || '0'} kg
+                          <strong>Descanso:</strong> {exercise.descanso_segundos || '60'} seg
                         </div>
                       </ExerciseContent>
                     </ExerciseItem>
@@ -271,7 +313,7 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
             <Separator></Separator>
             
             <ReviewItem>
-              <strong>Nome:</strong>
+              <strong>Nome do Treino:</strong>
               <span>{workout.nome}</span>
             </ReviewItem>
             
@@ -316,13 +358,21 @@ const EditarTreino = ({ userId, workoutId, onClose }) => {
 
                       <ExerciseContent>
                         <div>
+                          <strong>Carga:</strong> {exercise.carga_kg || '0'} kg
+                        </div>
+                        {exercise.equipamento && (
+                          <div>
+                            <strong>Equipamento:</strong> {exercise.equipamento}
+                          </div>
+                        )}
+                        <div>
                           <strong>Séries:</strong> {exercise.series}
                         </div>
                         <div>
                           <strong>Repetições:</strong> {exercise.repeticoes}
                         </div>
                         <div>
-                          <strong>Carga:</strong> {exercise.carga_kg || '0'} kg
+                          <strong>Descanso:</strong> {exercise.descanso_segundos || '60'} seg
                         </div>
                       </ExerciseContent>
                     </ExerciseItem>

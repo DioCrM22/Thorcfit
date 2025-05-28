@@ -12,6 +12,10 @@ export const Container = styled.div`
   align-items: center;
   justify-content: center;
   padding: 20px;
+  
+  @media (max-width: 768px) {
+    padding: 10px;
+  }
 `;
 
 export const FormBox = styled.div`
@@ -21,13 +25,20 @@ export const FormBox = styled.div`
   max-width: 430px;
   animation: ${slideIn} 0.5s ease;
   box-shadow: 4px 8px rgba(0,0,0,0.2);
-  
+  padding: 30px;
   display: flex;
   flex-direction: column;
-
+  gap: 15px;
+  
+  @media (max-width: 768px) {
+    padding: 20px;
+    gap: 10px;
+    margin: 10px;
+  }
+  
   @media (max-width: 430px) {
-    padding: 20px 30px 0px 30px;
-    gap: 9px;
+    padding: 15px;
+    gap: 8px;
   }
 `;
 
@@ -36,6 +47,15 @@ export const LogoIcon = styled.div`
   margin-bottom: 10px;
   img {
     max-width: 200px;
+    height: auto;
+    
+    @media (max-width: 768px) {
+      max-width: 180px;
+    }
+    
+    @media (max-width: 480px) {
+      max-width: 150px;
+    }
   }
 `;
 
@@ -65,16 +85,14 @@ export const Title = styled.h2`
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.1);
   letter-spacing: 1.5px;
   
-  // Estilos de hover no container principal
-  transition: all 0.3s ease;
-
-  &:hover {
-    opacity: 0.9;
-    transform: scale(1.05);
+  @media (max-width: 768px) {
+    font-size: 1.7rem;
+    letter-spacing: 1px;
   }
-
-  @media (max-width: 500px) {
-    font-size: 1.9rem;
+  
+  @media (max-width: 480px) {
+    font-size: 1.5rem;
+    margin-bottom: 8px;
   }
 `;
 
@@ -110,6 +128,14 @@ export const FooterText = styled.p`
   padding: 5px;
   font-size: 18px;
   font-weight: bold;
+  
+  @media (max-width: 768px) {
+    font-size: 16px;
+  }
+  
+  @media (max-width: 480px) {
+    font-size: 14px;
+  }
   
   a {
     color: rgb(42, 94, 236);

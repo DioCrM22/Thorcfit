@@ -1,6 +1,7 @@
 // src/pages/Alimentacao/AddAlimentoPopup/index.js
 import React, { useState, useEffect } from 'react';
 import * as S from './styles';
+import { FiPlusCircle } from 'react-icons/fi';
 import CadastroAlimentoPopup from '../CadastroAlimentoPopup';
 
 const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
@@ -98,12 +99,12 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
             </div>
             
             <S.ButtonGroup>
-              <S.SecondaryButton type="button" onClick={handleNovoAlimento}>
-                Cadastrar novo alimento
-              </S.SecondaryButton>
               <S.PrimaryButton type="submit">
-                Adicionar
+                <FiPlusCircle />Adicionar
               </S.PrimaryButton>
+
+              <S.SecondaryButton type="button" onClick={handleNovoAlimento}>🍰 Novo Alimento
+              </S.SecondaryButton>
             </S.ButtonGroup>
           </S.Form>
         </S.Modal>

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiPlay, FiPause, FiCheck, FiClock } from 'react-icons/fi';
+import { FiPlay, FiPause, FiCheck, FiClock, FiInfo } from 'react-icons/fi';
 import Confetti from 'react-confetti';
 import * as S from './styles';
 import NavBar from '../../components/NavBar';
@@ -15,12 +15,45 @@ const mockTreinos = [
     repeticoes: 12,
     series: 3,
     descanso: 45,
-    descricao: 'Deitado no banco, segure a barra com as mãos afastadas.',
+    descricao: 'Mantenha as costas retas e desça até os joelhos formarem 90 graus',
+    grupo_muscular: 'Pernas',
+    equipamento: 'Halteres',
+    carga_kg: 15,
     gif: '/assets/gif/Agachamento com halteres.gif',
     paused: false
   },
-  {
+  { 
     id: 2,
+    nome: 'Avanço (Afundo) com Halteres',
+    realizado: false,
+    tempo: 30,
+    repeticoes: 12,
+    series: 3,
+    descanso: 45,
+    descricao: 'Dê um passo à frente e desça até o joelho traseiro quase tocar o chão',
+    grupo_muscular: 'Pernas',
+    equipamento: 'Halteres',
+    carga_kg: 10,
+    gif: '/assets/gif/Avanço (Afundo) com halteres.gif',
+    paused: false
+  },
+  {
+    id: 3,
+    nome: 'Elevação de Quadril',
+    realizado: false,
+    tempo: 60,
+    repeticoes: 1,
+    series: 1,
+    descanso: 30,
+    descricao: 'Deitado de costas, eleve o quadril mantendo as costas retas',
+    grupo_muscular: 'Glúteos',
+    equipamento: 'Colchonete',
+    carga_kg: null,
+    gif: '/assets/gif/Elevação de Quadril com Pernas Flexionadas.gif',
+    paused: false
+  },
+  {
+    id: 4,
     nome: 'Esteira',
     realizado: false,
     tempo: 60,
@@ -28,34 +61,13 @@ const mockTreinos = [
     series: 1,
     descanso: 30,
     descricao: 'Corrida moderada na esteira',
+    grupo_muscular: 'Cardio',
+    equipamento: 'Esteira',
+    carga_kg: null,
     gif: '/assets/gif/Esteira.gif',
     paused: false
   },
-  { 
-    id: 3,
-    nome: 'Avanço(Afundo) com Halteres',
-    realizado: false,
-    tempo: 30,
-    repeticoes: 12,
-    series: 3,
-    descanso: 45,
-    descricao: 'Deitado no banco, segure a barra com as mãos afastadas.',
-    gif: '/assets/gif/Avanço (Afundo) com halteres.gif',
-    paused: false
-  },
   {
-    id: 4,
-    nome: 'Elevação de Quadril com Pernas Flexionadas',
-    realizado: false,
-    tempo: 60,
-    repeticoes: 1,
-    series: 1,
-    descanso: 30,
-    descricao: 'Corrida moderada na esteira',
-    gif: '/assets/gif/Elevação de Quadril com Pernas Flexionadas.gif',
-    paused: false
-  },
-   {
     id: 5,
     nome: 'Flexão de Braço',
     realizado: false,
@@ -63,49 +75,74 @@ const mockTreinos = [
     repeticoes: 12,
     series: 3,
     descanso: 45,
-    descricao: 'Deitado no banco, segure a barra com as mãos afastadas.',
+    descricao: 'Mantenha o corpo alinhado e desça até que o peito fique próximo ao chão, empurrando de volta até a posição inicial.',
+    grupo_muscular: 'Peitoral, Tríceps e Ombros',
+    equipamento: 'Colchonete',
+    carga_kg: null,
     gif: '/assets/gif/Flexão de Braço.gif',
     paused: false
   },
   {
-    id: 6,
-    nome: 'Marcha Estacionária',
+  id: 6,
+  nome: 'Marcha Estacionária',
+  realizado: false,
+  tempo: 45,
+  repeticoes: null,
+  series: 3,
+  descanso: 30,
+  descricao: 'Em pé, eleve os joelhos alternadamente como se estivesse marchando no mesmo lugar, mantendo o core ativado e os braços acompanhando o movimento naturalmente.',
+  grupo_muscular: 'Quadríceps, Glúteos e Core',
+  equipamento: 'Nenhum',
+  carga_kg: null,
+  gif: '/assets/gif/Marcha Estacionaria.gif',
+  paused: false
+},
+  {
+    id: 7,
+    nome: 'Polichinelo',
     realizado: false,
     tempo: 60,
     repeticoes: 1,
     series: 1,
     descanso: 30,
-    descricao: 'Corrida moderada na esteira',
-    gif: '/assets/gif/Marcha Estacionária.gif',
-    paused: false
-  },
-  { 
-    id: 7,
-    nome: 'Polichinelo',
-    realizado: false,
-    tempo: 30,
-    repeticoes: 12,
-    series: 3,
-    descanso: 45,
-    descricao: 'Deitado no banco, segure a barra com as mãos afastadas.',
+    descricao: 'Exercício aeróbico que consiste em abrir e fechar braços e pernas ao mesmo tempo, ideal para aquecimento.',
+    grupo_muscular: 'Cardio',
+    equipamento: 'Nenhum',
+    carga_kg: null,
     gif: '/assets/gif/Polichinelo.gif',
     paused: false
   },
   {
     id: 8,
-    nome: 'Subida no Banco (Step-up)',
+    nome: 'Stiff com Halteres',
     realizado: false,
-    tempo: 60,
-    repeticoes: 1,
-    series: 1,
-    descanso: 30,
-    descricao: 'Corrida moderada na esteira',
-    gif: '/assets/gif/Subida no banco (Step-up).gif',
+    tempo: 30,
+    repeticoes: 10,
+    series: 3,
+    descanso: 60,
+    descricao: 'Com os halteres nas mãos, mantenha os joelhos levemente flexionados e desça o tronco até sentir alongamento nos posteriores da coxa, retornando à posição inicial.',
+    grupo_muscular: 'Posterior de Coxa e Glúteos',
+    equipamento: 'Halteres',
+    carga_kg: 20,
+    gif: '/assets/gif/Stiff com halteres.gif',
     paused: false
-  }
+  },
+  {
+  id: 9,
+  nome: 'Subida no banco',
+  realizado: false,
+  tempo: 30,
+  repeticoes: 12,
+  series: 3,
+  descanso: 45,
+  descricao: 'Posicione-se em frente a um banco ou step. Suba com uma perna de cada vez, mantendo o tronco ereto e o core ativado. Desça com controle e repita alternando as pernas.',
+  grupo_muscular: 'Quadríceps, Glúteos e Panturrilha',
+  equipamento: 'Banco ou step',
+  carga_kg: null,
+  gif: '/assets/gif/Subida no banco (Step-up).gif',
+  paused: false
+},
 ];
-
-
 
 export default function Treinos() {
   const [treinos, setTreinos] = useState(mockTreinos);
@@ -118,7 +155,15 @@ export default function Treinos() {
   const [currentStage, setCurrentStage] = useState('exercise');
   const [currentRep, setCurrentRep] = useState(1);
   const [currentSerie, setCurrentSerie] = useState(1);
+  const [showDetails, setShowDetails] = useState({});
   const navigate = useNavigate();
+
+  const toggleDetails = (id) => {
+    setShowDetails(prev => ({
+      ...prev,
+      [id]: !prev[id]
+    }));
+  };
 
   const handleFinishWorkout = useCallback(() => {
     if (currentSerie < selectedTreino?.series) {
@@ -205,82 +250,52 @@ export default function Treinos() {
     setSelectedTreino(null);
   };
 
-  const handleDeleteWorkout = (id) => {
-    setTreinos(treinos.filter(t => t.id !== id));
-  };
-
   return (
     <S.Page>
       <NavBar 
-        title="TREINOS FIT"
+        title="THORC FIT"
         showBack={true}
         showMenu={false}
         onBack={() => navigate('/ver-treinos')}
       />
-      
+
       {showConfetti && (
-        <Confetti
-          width={window.innerWidth}
-          height={window.innerHeight}
-          recycle={false}
-          numberOfPieces={200}
-          gravity={0.5}
-        />
+        <Confetti width={window.innerWidth} height={window.innerHeight} recycle={false} numberOfPieces={200} gravity={0.5} />
       )}
 
       <S.Content>
         <S.TreinosList>
           {treinos.map((item) => (
-            <motion.div
-              key={item.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.3 }}
-            >
+            <motion.div key={item.id} initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }}>
               <S.TreinoCard>
                 <S.GifContainer>
-                  <img 
-                    src={item.gif} 
-                    alt={item.nome}
-                    style={{
-                      width: '150px',
-                      height: '150px',
-                      objectFit: 'contain',
-                      backgroundColor: 'white'
-                    }}
-                  />
-                  <S.TimeBadge>
-                    <FiClock size={14} /> {item.tempo}s
-                  </S.TimeBadge>
-                  <S.RepInfo>
-                    {item.repeticoes} rep x {item.series} séries
-                  </S.RepInfo>
+                  <img src={item.gif} alt={item.nome} />
+                  <S.TimeBadge><FiClock size={14} /> {item.tempo}s</S.TimeBadge>
+                  <S.RepInfo>{item.repeticoes} rep x {item.series} séries</S.RepInfo>
                 </S.GifContainer>
-                
                 <S.TreinoInfo>
-                  <h3>{item.nome}</h3>
-                  <p>{item.descricao}</p>
-                  
+                  <S.TreinoHeader>
+                    <h3>{item.nome}</h3>
+                    <S.InfoButton onClick={() => toggleDetails(item.id)}><FiInfo size={18} /></S.InfoButton>
+                  </S.TreinoHeader>
+                  <AnimatePresence>
+                    {showDetails[item.id] && (
+                      <S.ExerciseDetails initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} exit={{ opacity: 0, height: 0 }} transition={{ duration: 0.3 }}>
+                        <p>{item.descricao}</p>
+                        <S.DetailsGrid>
+                          <div><strong>Grupo Muscular:</strong><span>{item.grupo_muscular}</span></div>
+                          <div><strong>Equipamento:</strong><span>{item.equipamento}</span></div>
+                          {item.carga_kg && (<div><strong>Carga:</strong><span>{item.carga_kg} kg</span></div>)}
+                          <div><strong>Descanso:</strong><span>{item.descanso}s</span></div>
+                        </S.DetailsGrid>
+                      </S.ExerciseDetails>
+                    )}
+                  </AnimatePresence>
                   <S.ButtonGroup>
                     {item.realizado ? (
-                      <S.FinishedButton>
-                        <FiCheck /> Finalizado
-                      </S.FinishedButton>
+                      <S.FinishedButton><FiCheck /> Finalizado</S.FinishedButton>
                     ) : (
-                      <>
-                        {item.paused ? (
-                          <S.ContinueButton onClick={() => handleStartWorkout(item)}>
-                            <FiPlay /> Continuar
-                          </S.ContinueButton>
-                        ) : (
-                          <S.ExecuteButton onClick={() => handleStartWorkout(item)}>
-                            <FiPlay /> Iniciar
-                          </S.ExecuteButton>
-                        )}
-                        <S.DeleteButton onClick={() => handleDeleteWorkout(item.id)}>
-                          ❌Excluir
-                        </S.DeleteButton>
-                      </>
+                      <S.ExecuteButton onClick={() => handleStartWorkout(item)}><FiPlay /> Iniciar</S.ExecuteButton>
                     )}
                   </S.ButtonGroup>
                 </S.TreinoInfo>
@@ -290,70 +305,55 @@ export default function Treinos() {
         </S.TreinosList>
 
         <AnimatePresence>
-            {selectedTreino && (
-              <S.FullScreenOverlay
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
-                <S.FullScreenContent>
-                  {showRest ? (
-                    <S.RestContainer>
-                      <S.RestTitle>DESCANSO - Série {currentSerie}/{selectedTreino.series}</S.RestTitle>
-                      <S.RestTimer>{timeLeft}s</S.RestTimer>
-                      <S.RestText>Aguarde {selectedTreino.descanso} segundos</S.RestText>
-                    </S.RestContainer>
-                  ) : (
-                    <>
-                      <S.GifContainer>
-                        <img 
-                          src={selectedTreino.gif} 
-                          alt={selectedTreino.nome}
-                          style={{
-                            width: '150px',
-                            height: '150px',
-                            objectFit: 'contain',
-                            backgroundColor: 'white'
-                          }}
-                        />
-                        <S.Timer>{timeLeft}s</S.Timer>
-                        <S.RepInfo>
-                          Rep {currentRep}/{selectedTreino.repeticoes} - Série {currentSerie}/{selectedTreino.series}
-                        </S.RepInfo>
-                      </S.GifContainer>
-                      
-                      {/* Adicione esta seção para mostrar a descrição */}
-                      <S.ExerciseDescription>
-                        <h3>{selectedTreino.nome}</h3>
-                        <p>{selectedTreino.descricao}</p>
-                      </S.ExerciseDescription>
-                      
-                      <S.ControlGroup>
-                        <S.StopButton onClick={handlePauseWorkout}>
-                          <FiPause /> Parar
-                        </S.StopButton>
-                      </S.ControlGroup>
-                    </>
-                  )}
-                </S.FullScreenContent>
-              </S.FullScreenOverlay>
-            )}
-          </AnimatePresence>
+          {selectedTreino && (
+            <S.FullScreenOverlay initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
+              <S.FullScreenContent>
+                {showRest ? (
+                  <S.RestContainer>
+                    <S.RestTitle>DESCANSO - Série {currentSerie}/{selectedTreino.series}</S.RestTitle>
+                    <S.RestTimer>{timeLeft}s</S.RestTimer>
+                    <S.RestText>Aguarde {selectedTreino.descanso} segundos</S.RestText>
+                  </S.RestContainer>
+                ) : (
+                  <>
+                    <S.FullScreenGifContainer>
+                      <img src={selectedTreino.gif} alt={selectedTreino.nome} />
+                      <S.Timer>{timeLeft}s</S.Timer>
+                      <S.RepInfo>
+                        Rep {currentRep}/{selectedTreino.repeticoes} - Série {currentSerie}/{selectedTreino.series}
+                      </S.RepInfo>
+                    </S.FullScreenGifContainer>
+
+                    <S.GifInfoContainer>
+                      <S.Timer>{timeLeft}s</S.Timer>
+                    </S.GifInfoContainer>
+
+                    <S.ExerciseDescription>
+                      <h3>{selectedTreino.nome}</h3>
+                      <p>{selectedTreino.descricao}</p>
+                      <S.DetailsGrid>
+                        <div><strong>Grupo Muscular:</strong><span>{selectedTreino.grupo_muscular}</span></div>
+                        <div><strong>Equipamento:</strong><span>{selectedTreino.equipamento}</span></div>
+                        {selectedTreino.carga_kg && (<div><strong>Carga:</strong><span>{selectedTreino.carga_kg} kg</span></div>)}
+                      </S.DetailsGrid>
+                    </S.ExerciseDescription>
+                    <S.ControlGroup>
+                      <S.StopButton onClick={handlePauseWorkout}><FiPause /> Parar</S.StopButton>
+                    </S.ControlGroup>
+                  </>
+                )}
+              </S.FullScreenContent>
+            </S.FullScreenOverlay>
+          )}
+        </AnimatePresence>
 
         <AnimatePresence>
           {showCompletion && (
-            <S.CompletionOverlay
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-            >
+            <S.CompletionOverlay initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <S.CompletionContent>
                 <S.LogoContainer>
                   <S.LogoGlow />
-                  <S.CompletionLogo 
-                    src="/assets/images/logo.png" 
-                    alt="Logo"
-                  />
+                  <S.CompletionLogo src="/assets/images/logo.png" alt="Logo" />
                 </S.LogoContainer>
                 <S.CompletionText>Treino Finalizado!</S.CompletionText>
               </S.CompletionContent>

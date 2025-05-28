@@ -83,12 +83,12 @@ export const Header = styled.div`
     letter-spacing: 0.8px;
     display: flex;
     align-items: center;
-    gap: 0.5rem;
+    gap: 0.7rem;
     text-shadow: 0 1px 2px rgba(0,0,0,0.1);
 
     &::before {
       content: '🍽️';
-      font-size: 1.4rem;
+      font-size: 1.3rem;
       animation: ${bounce} 2s infinite;
     }
   }

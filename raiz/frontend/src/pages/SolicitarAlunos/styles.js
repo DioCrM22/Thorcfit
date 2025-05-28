@@ -9,10 +9,10 @@ const CINZA = '#666';
 export const Container = styled(motion.div)`
   max-width: 800px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 10px;
   min-height: 100vh;
   font-family: 'Golos Text', sans-serif;
-  position: relative; /* Adicionado */
+  position: relative;
   
   * {
     font-family: 'Golos Text', sans-serif;
@@ -32,19 +32,18 @@ export const Header = styled.header`
   padding: 0 15px;
   position: relative;
 
-  /* Aumente o gap para desktop */
-  gap: 60px; /* Aumentado de 40px para 60px */
+  gap: 60px;
 
   @media (max-width: 1024px) {
-    gap: 40px;
+    gap: 10px;
   }
 
   @media (max-width: 768px) {
-    gap: 30px;
+    gap: 10px;
   }
 
   @media (max-width: 480px) {
-    gap: 20px;
+    gap: 10px;
   }
 `;
 
@@ -52,7 +51,7 @@ export const Logo = styled(motion.img)`
   height: 200px;
   margin-top: 0px;
   position: relative;
-  z-index: 1; /* Alterado de -2 para 1 */
+  z-index: 1;
 
   @media (max-width: 768px) {
     height: 180px;
@@ -103,7 +102,7 @@ export const FilterGroup = styled(motion.div)`
 `;
 
 export const FilterButton = styled(motion.button)`
-  padding: 8px 16px;
+  padding: 8px 10px;
   border: none;
   border-radius: 20px;
   cursor: pointer;
@@ -120,7 +119,7 @@ export const FilterButton = styled(motion.button)`
   }
 
   @media (max-width: 480px) {
-    padding: 6px 12px;
+    padding: 7px 5px;
     font-size: 13px;
   }
 `;

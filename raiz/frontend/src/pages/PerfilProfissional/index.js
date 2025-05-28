@@ -149,7 +149,7 @@ const ProfessionalProfile = () => {
           title="THORC FIT"
           showBack={true}
           showMenu={false}
-          onBack={() => navigate('/HOME')}
+          onBack={() => navigate('/treinadores')}
         />
 
         <EditButton 

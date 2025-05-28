@@ -98,7 +98,7 @@ const AlimentacaoPage = () => {
 
   return (
     <>
-      <NavBar title="ALIMENTAÇÃO FIT" showBack onBack={() => navigate('/home')} />
+      <NavBar title="THORC FIT" showBack onBack={() => navigate('/home')} />
 
       <S.Container>
         {/* Seletor de Data */}

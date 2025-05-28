@@ -87,7 +87,7 @@ export default function VerTreino() {
   return (
     <S.Page>
       <NavBar
-        title="TREINOS FIT"
+        title="THORC FIT"
         showBack
         onBack={() => navigate('/home')}
       />
