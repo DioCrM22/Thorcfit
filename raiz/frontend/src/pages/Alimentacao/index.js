@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { FiChevronLeft, FiChevronRight, FiPlus, FiMinus, FiCalendar } from 'react-icons/fi';
 import NavBar from '../../components/NavBar';
 import NutritionBars from './NutritionBars';
+import FloatingNutriButton from './FloatingNutriButton';
 import MealCard from './MealCard';
 import AddAlimentoPopup from './AddAlimentoPopup';
 import * as S from './styles';
@@ -14,6 +15,9 @@ const AlimentacaoPage = () => {
   const navigate = useNavigate();
   const [currentDate, setCurrentDate] = useState(new Date());
   const [waterIntake, setWaterIntake] = useState(1500);
+  const [totalWaterGoal, setTotalWaterGoal] = useState(2500);
+  const [editWaterGoal, setEditWaterGoal] = useState(false);
+  const [newGoal, setNewGoal] = useState(totalWaterGoal);
   const [showCalendar, setShowCalendar] = useState(false);
   const [showAddFood, setShowAddFood] = useState(false);
   const [currentMeal, setCurrentMeal] = useState(null);
@@ -39,8 +43,6 @@ const AlimentacaoPage = () => {
       items: []
     }
   ]);
-
-  const totalWaterGoal = 2500;
 
   const dailyNutrition = {
     calories: meals.reduce((sum, meal) => sum + meal.items.reduce((s, item) => s + item.calories, 0), 0),
@@ -106,6 +108,8 @@ const AlimentacaoPage = () => {
           <S.DayButton onClick={() => changeDate(-1)}>
             <FiChevronLeft size={20} />
           </S.DayButton>
+          
+          <FloatingNutriButton />
 
           <S.CurrentDayContainer>
             <S.CurrentDay>
@@ -141,7 +145,35 @@ const AlimentacaoPage = () => {
         <S.WaterTracker>
           <S.WaterHeader>
             <S.WaterTitle>💧 Hidratação Diária</S.WaterTitle>
+            <S.EditButton onClick={() => setEditWaterGoal(true)}>🚩Editar Meta</S.EditButton>
           </S.WaterHeader>
+
+          {editWaterGoal && (
+            <S.EditPopup>
+              <p>
+                📢 <strong>Sua nutricionista</strong> recomenda o limite diário de água com base nos seus dados.
+              </p>
+              <label htmlFor="metaAgua">Nova meta (em ml):</label>
+              <input
+                type="number"
+                id="metaAgua"
+                value={newGoal}
+                min={500}
+                step={100}
+                onChange={(e) => setNewGoal(parseInt(e.target.value))}
+              />
+              <div>
+                <button onClick={() => {
+                  setTotalWaterGoal(newGoal);
+                  if (waterIntake > newGoal) setWaterIntake(newGoal);
+                  setEditWaterGoal(false);
+                }}>
+                  Salvar
+                </button>
+                <button onClick={() => setEditWaterGoal(false)}>Cancelar</button>
+              </div>
+            </S.EditPopup>
+          )}
           
           <S.WaterContent>
             <S.WaterGlassContainer>

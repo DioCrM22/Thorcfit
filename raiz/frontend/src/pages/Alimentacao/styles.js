@@ -159,6 +159,97 @@ export const CalendarPopup = styled.div`
   }
 `;
 
+export const EditButton = styled.button`
+  background: none;
+  border: none;
+  color: ${AZUL};
+  font-size: 0.85rem;
+  cursor: pointer;
+  padding: 4px 8px;
+  font-weight: 600;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: rgba(58, 134, 255, 0.1);
+  }
+`;
+
+export const EditPopup = styled.div`
+  background: #fffdfc;
+  border: 1px solid #eee;
+  padding: 1rem;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  font-size: 0.95rem;
+  color: #444;
+  animation: ${fadeIn} 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+
+  p {
+    margin-bottom: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  label {
+    display: block;
+    font-weight: bold;
+    margin-top: 0.5rem;
+    margin-bottom: 0.3rem;
+  }
+
+  input {
+    width: 100%;
+    padding: 0.5rem 0.7rem;
+    border-radius: 8px;
+    border: 1px solid #ccc;
+    font-size: 1rem;
+    margin-bottom: 1rem;
+  }
+
+  div {
+    display: flex;
+    gap: 1rem;
+
+    button {
+      flex: 1;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+      font-weight: bold;
+      font-size: 0.9rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      border: none;
+    }
+
+    button:first-child {
+      background: ${AZUL};
+      color: white;
+
+      &:hover {
+        background: ${darken(0.1, AZUL)};
+      }
+    }
+
+    button:last-child {
+      background: #eee;
+
+      &:hover {
+        background: #ddd;
+      }
+    }
+  }
+
+  @media (max-width: 480px) {
+    input {
+      font-size: 0.9rem;
+    }
+    p {
+      font-size: 0.85rem;
+    }
+  }
+`;
+
 export const WaterTracker = styled.div`
   background: white;
   border-radius: 16px;
