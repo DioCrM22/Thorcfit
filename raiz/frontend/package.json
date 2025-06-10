@@ -76,5 +76,10 @@
     "css-select": "5.1.0",
     "postcss": "8.4.31",
     "resolve-url-loader": "5.0.0"
-  }
+  },
+  "main": "index.js",
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": ""
 }
