@@ -61,7 +61,7 @@ module.exports = (sequelize) => {
     ],
   });
 
-  const VinculoNutricao = sequelize.define("VinculoNutricao", {
+  const VinculoNutricional = sequelize.define("VinculoNutricional", {
     id_vinculo: {
       type: DataTypes.INTEGER,
       primaryKey: true,
@@ -81,7 +81,7 @@ module.exports = (sequelize) => {
       defaultValue: DataTypes.NOW,
     },
     data_fim: {
-      type: DataTypes.DECIMAL(8, 2),
+      type: DataTypes.DATEONLY,
       allowNull: true,
     },
     status: {
@@ -94,7 +94,7 @@ module.exports = (sequelize) => {
       allowNull: true,
     },
   }, {
-    tableName: "vinculo_nutricao",
+    tableName: "vinculo_nutricional",
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
@@ -120,7 +120,7 @@ module.exports = (sequelize) => {
       defaultValue: DataTypes.NOW,
     },
     data_fim: {
-      type: DataTypes.DECIMAL(8, 2),
+      type: DataTypes.DATEONLY,
       allowNull: true,
     },
     status: {
@@ -137,47 +137,6 @@ module.exports = (sequelize) => {
     timestamps: true,
     createdAt: "created_at",
     updatedAt: "updated_at",
-  });
-
-  const Amizade = sequelize.define("Amizade", {
-    id_amizade: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    id_usuario_solicitante: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    id_usuario_destinatario: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    data_solicitacao: {
-      type: DataTypes.DATEONLY,
-      allowNull: false,
-      defaultValue: DataTypes.NOW,
-    },
-    data_aceite: {
-      type: DataTypes.DATEONLY,
-      allowNull: true,
-    },
-    status: {
-      type: DataTypes.ENUM("pendente", "aceita", "rejeitada", "bloqueada"),
-      allowNull: false,
-      defaultValue: "pendente",
-    },
-  }, {
-    tableName: "amizade",
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-    indexes: [
-      {
-        unique: true,
-        fields: ["id_usuario_solicitante", "id_usuario_destinatario"],
-      },
-    ],
   });
 
   const MetasUsuario = sequelize.define("MetasUsuario", {
@@ -229,9 +188,8 @@ module.exports = (sequelize) => {
 
   return {
     MetricasUsuario,
-    VinculoNutricao,
+    VinculoNutricional,
     VinculoTreino,
-    Amizade,
     MetasUsuario
   };
 };

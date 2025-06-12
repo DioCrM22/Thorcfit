@@ -1,248 +1,195 @@
-const { DataTypes } = require('sequelize');
-const { sequelize } = require('../config/database');
-const Usuario = require('./Usuario');
-const { PersonalTrainer } = require('./Profissionais');
+const { DataTypes } = require("sequelize");
 
-const Exercicio = sequelize.define('Exercicio', {
-  id_exercicio: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  nome: {
-    type: DataTypes.STRING(100),
-    allowNull: false
-  },
-  descricao: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  grupo_muscular: {
-    type: DataTypes.STRING(50),
-    allowNull: false
-  },
-  equipamento_necesario: {
-    type: DataTypes.STRING(100),
-    allowNull: true
-  },
-  nivel_dificuldade: {
-    type: DataTypes.ENUM('iniciante', 'intermediario', 'avancado'),
-    allowNull: true,
-    defaultValue: 'intermediario'
-  },
-  instrucoes: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  gif_url: {
-    type: DataTypes.STRING(255),
-    allowNull: true
-  }
-}, {
-  tableName: 'exercicio',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-});
+module.exports = (sequelize) => {
+  const Exercicio = sequelize.define("Exercicio", {
+    id_exercicio: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    nome: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    descricao: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    grupo_muscular: {
+      type: DataTypes.STRING(50),
+      allowNull: false,
+    },
+    equipamento_necesario: {
+      type: DataTypes.STRING(100),
+      allowNull: true,
+    },
+    nivel_dificuldade: {
+      type: DataTypes.ENUM("iniciante", "intermediario", "avancado"),
+      allowNull: true,
+      defaultValue: "intermediario",
+    },
+    instrucoes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    gif_url: {
+      type: DataTypes.STRING(255),
+      allowNull: true,
+    },
+  }, {
+    tableName: "exercicio",
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
+  });
 
-const PlanoTreino = sequelize.define('PlanoTreino', {
-  id_plano_treino: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  tipo_criador: {
-    type: DataTypes.ENUM('usuario', 'personal'),
-    allowNull: false
-  },
-  id_criador_usuario: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: Usuario,
-      key: 'id_usuario'
-    }
-  },
-  id_criador_personal: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    references: {
-      model: PersonalTrainer,
-      key: 'id_personal'
-    }
-  },
-  nome: {
-    type: DataTypes.STRING(100),
-    allowNull: false
-  },
-  descricao: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  data_criacao: {
-    type: DataTypes.DATEONLY,
-    allowNull: false,
-    defaultValue: DataTypes.NOW
-  },
-  status: {
-    type: DataTypes.ENUM('ativo', 'inativo', 'concluido'),
-    allowNull: false,
-    defaultValue: 'ativo'
-  },
-  nivel_dificuldade: {
-    type: DataTypes.ENUM('iniciante', 'intermediario', 'avancado'),
-    allowNull: true
-  },
-  duracao_estimada: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    comment: 'Duração em minutos'
-  }
-}, {
-  tableName: 'plano_treino',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-});
+  const PlanoTreino = sequelize.define("PlanoTreino", {
+    id_plano_treino: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    tipo_criador: {
+      type: DataTypes.ENUM("usuario", "personal"),
+      allowNull: false,
+    },
+    id_criador_usuario: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    id_criador_personal: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    nome: {
+      type: DataTypes.STRING(100),
+      allowNull: false,
+    },
+    descricao: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    data_criacao: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    status: {
+      type: DataTypes.ENUM("ativo", "inativo", "concluido"),
+      allowNull: false,
+      defaultValue: "ativo",
+    },
+    nivel_dificuldade: {
+      type: DataTypes.ENUM("iniciante", "intermediario", "avancado"),
+      allowNull: true,
+    },
+    duracao_estimada: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: "Duração em minutos",
+    },
+  }, {
+    tableName: "plano_treino",
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
+  });
 
-const ExerciciosDoTreino = sequelize.define('ExerciciosDoTreino', {
-  id_treino: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    references: {
-      model: PlanoTreino,
-      key: 'id_plano_treino'
-    }
-  },
-  id_exercicio: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    references: {
-      model: Exercicio,
-      key: 'id_exercicio'
-    }
-  },
-  series: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  repeticoes: {
-    type: DataTypes.INTEGER,
-    allowNull: false
-  },
-  carga: {
-    type: DataTypes.DECIMAL(8, 2),
-    allowNull: true,
-    comment: 'Carga em kg'
-  },
-  tempo_descanso: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    comment: 'Tempo de descanso em segundos'
-  },
-  observacoes: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  ordem: {
-    type: DataTypes.INTEGER,
-    allowNull: true,
-    comment: 'Ordem do exercício no treino'
-  }
-}, {
-  tableName: 'exercicios_do_treino',
-  timestamps: false
-});
+  const ExerciciosDoTreino = sequelize.define("ExerciciosDoTreino", {
+    id_treino: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+    },
+    id_exercicio: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+    },
+    series: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    repeticoes: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    carga: {
+      type: DataTypes.DECIMAL(8, 2),
+      allowNull: true,
+      comment: "Carga em kg",
+    },
+    tempo_descanso: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: "Tempo de descanso em segundos",
+    },
+    observacoes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    ordem: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: "Ordem do exercício no treino",
+    },
+  }, {
+    tableName: "exercicios_do_treino",
+    timestamps: false,
+  });
 
-const HistoricoTreino = sequelize.define('HistoricoTreino', {
-  id_historico: {
-    type: DataTypes.INTEGER,
-    primaryKey: true,
-    autoIncrement: true
-  },
-  id_usuario: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: Usuario,
-      key: 'id_usuario'
-    }
-  },
-  id_plano_treino: {
-    type: DataTypes.INTEGER,
-    allowNull: false,
-    references: {
-      model: PlanoTreino,
-      key: 'id_plano_treino'
-    }
-  },
-  data_treino: {
-    type: DataTypes.DATEONLY,
-    allowNull: false
-  },
-  hora_inicio: {
-    type: DataTypes.TIME,
-    allowNull: true
-  },
-  hora_fim: {
-    type: DataTypes.TIME,
-    allowNull: true
-  },
-  duracao_minutos: {
-    type: DataTypes.INTEGER,
-    allowNull: true
-  },
-  calorias_queimadas: {
-    type: DataTypes.INTEGER,
-    allowNull: true
-  },
-  observacoes: {
-    type: DataTypes.TEXT,
-    allowNull: true
-  },
-  concluido: {
-    type: DataTypes.BOOLEAN,
-    allowNull: false,
-    defaultValue: false
-  }
-}, {
-  tableName: 'historico_treino',
-  timestamps: true,
-  createdAt: 'created_at',
-  updatedAt: 'updated_at'
-});
+  const HistoricoTreino = sequelize.define("HistoricoTreino", {
+    id_historico: {
+      type: DataTypes.INTEGER,
+      primaryKey: true,
+      autoIncrement: true,
+    },
+    id_usuario: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    id_plano_treino: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+    data_treino: {
+      type: DataTypes.DATEONLY,
+      allowNull: false,
+    },
+    hora_inicio: {
+      type: DataTypes.TIME,
+      allowNull: true,
+    },
+    hora_fim: {
+      type: DataTypes.TIME,
+      allowNull: true,
+    },
+    duracao_minutos: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    calorias_queimadas: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+    },
+    observacoes: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    concluido: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+  }, {
+    tableName: "historico_treino",
+    timestamps: true,
+    createdAt: "created_at",
+    updatedAt: "updated_at",
+  });
 
-// Definir associações
-Usuario.hasMany(PlanoTreino, { foreignKey: 'id_criador_usuario', as: 'planosTreinoUsuario' });
-PlanoTreino.belongsTo(Usuario, { foreignKey: 'id_criador_usuario', as: 'criadorUsuario' });
-
-PersonalTrainer.hasMany(PlanoTreino, { foreignKey: 'id_criador_personal', as: 'planosTreinoPersonal' });
-PlanoTreino.belongsTo(PersonalTrainer, { foreignKey: 'id_criador_personal', as: 'criadorPersonal' });
-
-PlanoTreino.belongsToMany(Exercicio, { 
-  through: ExerciciosDoTreino, 
-  foreignKey: 'id_treino',
-  otherKey: 'id_exercicio',
-  as: 'exercicios'
-});
-
-Exercicio.belongsToMany(PlanoTreino, { 
-  through: ExerciciosDoTreino, 
-  foreignKey: 'id_exercicio',
-  otherKey: 'id_treino',
-  as: 'planosTreino'
-});
-
-Usuario.hasMany(HistoricoTreino, { foreignKey: 'id_usuario', as: 'historicoTreinos' });
-HistoricoTreino.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
-
-PlanoTreino.hasMany(HistoricoTreino, { foreignKey: 'id_plano_treino', as: 'historicos' });
-HistoricoTreino.belongsTo(PlanoTreino, { foreignKey: 'id_plano_treino', as: 'planoTreino' });
-
-module.exports = {
-  Exercicio,
-  PlanoTreino,
-  ExerciciosDoTreino,
-  HistoricoTreino
+  return {
+    Exercicio,
+    PlanoTreino,
+    ExerciciosDoTreino,
+    HistoricoTreino
+  };
 };
-
