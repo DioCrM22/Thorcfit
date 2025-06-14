@@ -134,8 +134,10 @@ CREATE TABLE `metricas_usuario` (
 CREATE TABLE `nutricionista` (
   `id_nutricionista` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
-  `registro_nutricionista` varchar(20) DEFAULT NULL,
-  `bio` text DEFAULT NULL
+  `crn` varchar(50) DEFAULT NULL,
+  `especialidade` text DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `preco_consulta` decimal(8,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -147,8 +149,10 @@ CREATE TABLE `nutricionista` (
 CREATE TABLE `personal_trainer` (
   `id_personal` int(11) NOT NULL,
   `id_usuario` int(11) NOT NULL,
-  `registro_personal` varchar(20) DEFAULT NULL,
-  `bio` text DEFAULT NULL
+  `cref` varchar(50) DEFAULT NULL,
+  `especialidade` text DEFAULT NULL,
+  `bio` text DEFAULT NULL,
+  `preco_sessao` decimal(8,2) DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
