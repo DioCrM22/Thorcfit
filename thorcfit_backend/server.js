@@ -130,12 +130,6 @@ async function startServer() {
       console.log(`🌐 API disponível em: http://localhost:${PORT}/api`);
       console.log(`💚 Health check: http://localhost:${PORT}/health`);
       console.log(`📚 Documentação: http://localhost:${PORT}/api`);
-      
-      if (process.env.NODE_ENV === 'development') {
-        console.log('\n🔧 Modo de desenvolvimento ativo');
-        console.log('📊 Para popular o banco com dados de teste, execute:');
-        console.log('   npm run seed');
-      }
     });
 
   } catch (error) {

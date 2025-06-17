@@ -1,3 +1,4 @@
+/*
 const bcrypt = require("bcryptjs");
 const { sequelize } = require("../src/config/database"); // Importa sequelize diretamente
 const models = require("../src/models"); // Importa o objeto models completo
@@ -275,3 +276,5 @@ async function seedDatabase() {
     }
 
     seedDatabase();
+
+    */
