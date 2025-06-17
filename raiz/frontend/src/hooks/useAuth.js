@@ -10,28 +10,27 @@ export const AuthProvider = ({ children }) => {
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-
-  // Primeiro definimos todas as funções que serão usadas
   const logout = useCallback(() => {
     localStorage.removeItem('authToken');
     setUser(null);
-    navigate('/login', { replace: true });
+    navigate('/signin', { replace: true }); // Use /signin para ficar igual as rotas
   }, [navigate]);
 
   const handleAuthSuccess = useCallback((token, userData) => {
     localStorage.setItem('authToken', token);
     setUser(userData);
     setLoading(false);
-    navigate('/home', { replace: true });
-  }, [navigate]);
+  }, []);
 
   const checkSession = useCallback(async () => {
     try {
       const token = localStorage.getItem('authToken');
-      if (!token) return null;
+      if (!token) {
+        setInitializing(false);
+        return null;
+      }
   
-      // Verifique o prefixo correto (/auth ou /api)
-      const { data } = await axios.get('http://localhost:5000/auth/usuario-perfil', {
+      const { data } = await axios.get('/auth/usuario-perfil', {
         headers: { Authorization: `Bearer ${token}` }
       });
   
@@ -49,84 +48,89 @@ export const AuthProvider = ({ children }) => {
     }
   }, [logout]);
 
-  // Adicione esta função ao seu context
-const fetchUserProfile = async () => {
-  try {
-    const token = localStorage.getItem('authToken');
-    const { data } = await axios.get('/auth/usuario-perfil', {
-      headers: { Authorization: `Bearer ${token}` }
-    });
-    setUser(data);
-    return data;
-  } catch (error) {
-    console.error('Erro ao carregar perfil:', error);
-    logout();
-    return null;
-  }
-};
-
-const updateProfile = async (updatedData) => {
-  setLoading(true);
-  try {
-    const token = localStorage.getItem('authToken');
-    const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-
-    const { data } = await axios.put(`${backendUrl}/api/usuario-perfil`, updatedData, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    });
-
-    if (data?.usuarioAtualizado) {
-      setUser(data.usuarioAtualizado); // Atualiza o estado do usuário
-      return null;
-    } else {
-      return 'Erro ao atualizar perfil';
-    }
-  } catch (error) {
-    console.error('Erro ao atualizar perfil:', error);
-    return error.response?.data?.error || 'Erro ao atualizar perfil';
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const signup = async (nome, email, senha) => {
-    setLoading(true);
+  const fetchUserProfile = async () => {
     try {
-      const { data } = await axios.post('http://localhost:5000/api/signup', { nome, email, senha });
-      if (data.error) throw new Error(data.error);
-      handleAuthSuccess(data.token, data.usuario);
-      return null;
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Token não encontrado');
+
+      const { data } = await axios.get('/auth/usuario-perfil', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      if (data?.success && data.usuario) {
+        setUser(data.usuario);
+        return data.usuario;
+      }
+      throw new Error('Dados inválidos');
     } catch (error) {
-      setLoading(false);
-      return error.response?.data?.error || 'Erro ao cadastrar';
+      console.error('Erro ao carregar perfil:', error);
+      logout();
+      return null;
     }
   };
 
-  const googleLogin = async (googleToken) => {
+  const updateProfile = async (updatedData) => {
     setLoading(true);
     try {
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      const { data } = await axios.post(
-        `${backendUrl}/google`,
-        { token: googleToken }
-      );
+      const token = localStorage.getItem('authToken');
+      if (!token) throw new Error('Token não encontrado');
+
+      const { data } = await axios.put('/auth/usuario-perfil', updatedData, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      if (data?.success && data.usuario) {
+        setUser(data.usuario);
+        return null;
+      } else {
+        return data?.error || 'Erro ao atualizar perfil';
+      }
+    } catch (error) {
+      console.error('Erro ao atualizar perfil:', error);
+      return error.response?.data?.error || 'Erro ao atualizar perfil';
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const signup = async (nome, email, senha, tipoUsuario = 'usuario') => {
+    setLoading(true);
+    try {
+      const { data } = await axios.post('/auth/signup', { 
+        nome, 
+        email, 
+        senha,
+        tipo_usuario: tipoUsuario
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
       
-      if (!data.token || !data.usuario) throw new Error('Resposta inválida');
-      handleAuthSuccess(data.token, data.usuario);
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      if (data.token && data.usuario) {
+        handleAuthSuccess(data.token, data.usuario);
+        return { success: true };
+      } else {
+        throw new Error('Resposta inválida do servidor');
+      }
     } catch (error) {
       setLoading(false);
-      throw error.response?.data?.error || new Error('Falha no login Google');
+      console.error('Erro no cadastro:', error);
+      return { success: false, error: error.response?.data?.error || error.message || 'Erro ao cadastrar' };
     }
   };
 
   const signin = async (email, senha) => {
     setLoading(true);
     try {
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      
-      const { data } = await axios.post(`${backendUrl}/auth/login`, {
+      const { data } = await axios.post('/auth/login', {
         email,
         senha
       }, {
@@ -135,17 +139,21 @@ const updateProfile = async (updatedData) => {
         }
       });
   
-      if (!data.token || !data.usuario) {
+      if (data.error) {
+        throw new Error(data.error);
+      }
+      
+      if (data.token && data.usuario) {
+        handleAuthSuccess(data.token, data.usuario);
+        return { success: true };
+      } else {
         throw new Error('Resposta inválida do servidor');
       }
-  
-      handleAuthSuccess(data.token, data.usuario);
-      return { success: true };
     } catch (error) {
-      console.error('Erro detalhado:', error);
+      console.error('Erro no login:', error);
       return { 
         success: false,
-        error: error.response?.data?.error || 'Erro ao fazer login' 
+        error: error.response?.data?.error || error.message || 'Erro ao fazer login' 
       };
     } finally {
       setLoading(false);
@@ -155,9 +163,12 @@ const updateProfile = async (updatedData) => {
   const forgotPassword = async (email) => {
     setLoading(true);
     try {
-      const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-      const { data } = await axios.post(`${backendUrl}/api/auth/forgot-password`, { 
+      const { data } = await axios.post('/auth/forgot-password', { 
         email 
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
       });
       
       if (data.error) {
@@ -173,22 +184,45 @@ const updateProfile = async (updatedData) => {
   };
 
   const resetPassword = async (email, newPassword) => {
-  setLoading(true);
-  try {
-    const backendUrl = process.env.REACT_APP_API_URL || 'http://localhost:5000';
-    const { data } = await axios.post(`${backendUrl}/api/auth/reset-password`, {
-      email,
-      newPassword
-    });
-    return data.error || null;
-  } catch (error) {
-    console.error('Erro ao redefinir senha:', error);
-    return error.response?.data?.error || 'Erro ao redefinir senha';
-  } finally {
-    setLoading(false);
-  }
-};
-  // Inicialização
+    setLoading(true);
+    try {
+      const { data } = await axios.post('/auth/reset-password', {
+        email,
+        newPassword
+      }, {
+        headers: {
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (data.error) {
+        return data.error;
+      }
+      return null;
+    } catch (error) {
+      console.error('Erro ao redefinir senha:', error);
+      return error.response?.data?.error || 'Erro ao redefinir senha';
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const verifyToken = async () => {
+    try {
+      const token = localStorage.getItem('authToken');
+      if (!token) return false;
+
+      const { data } = await axios.get('/auth/verify-token', {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      
+      return data?.valid || false;
+    } catch (error) {
+      console.error('Erro ao verificar token:', error);
+      return false;
+    }
+  };
+
   useEffect(() => {
     checkSession();
   }, [checkSession]);
@@ -201,11 +235,11 @@ const updateProfile = async (updatedData) => {
       checkSession,
       fetchUserProfile,
       signup,
-      googleLogin,
       signin,
       forgotPassword,
       resetPassword,
       updateProfile,
+      verifyToken,
       logout
     }}>
       {children}

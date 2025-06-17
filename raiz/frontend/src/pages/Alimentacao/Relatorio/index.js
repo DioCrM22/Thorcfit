@@ -164,13 +164,6 @@ const RelatorioUsuario = () => {
     return recomendacoes;
   };
 
-  // Carregar relatório automaticamente quando as datas mudarem
-  useEffect(() => {
-    if (dataInicio && dataFim && user?.id_usuario) {
-      gerarRelatorio();
-    }
-  }, [dataInicio, dataFim, user]);
-
   return (
     <S.Container>
       <S.Titulo>Relatório Nutricional</S.Titulo>

@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { FiCheck, FiPlus, FiFilter, FiX } from 'react-icons/fi';
+import { FiCheck, FiPlus, FiFilter, FiUser, FiHeart } from 'react-icons/fi';
 import NavBar from '../../components/NavBar';
+import api from '../../config/axios';
 import {
   Container,
   Header,
@@ -17,30 +18,8 @@ import {
   UserInfo,
   ActionGroup,
   AddButton,
-  DeleteButton,
   CheckBadge
 } from './styles';
-
-const mockUsers = [
-  {
-    id: 1,
-    nome: 'Carlos Silva',
-    email: 'carlos@exemplo.com',
-    telefone: '(11) 98765-4321',
-    foto_perfil: '/assets/images/default-avatar.png',
-    tipo: 'Treinador',
-    seguindo: true
-  },
-  {
-    id: 2,
-    nome: 'Ana Souza',
-    email: 'ana@exemplo.com',
-    telefone: '(21) 99876-5432',
-    foto_perfil: '/assets/images/default-avatar.png',
-    tipo: 'Treinador',
-    seguindo: false
-  }
-];
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -55,32 +34,108 @@ const itemVariants = {
   visible: { opacity: 1, y: 0 }
 };
 
-export default function AmigosPage() {
+export default function BuscarProfissionaisPage() {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('todos');
-  const [users, setUsers] = useState(mockUsers);
+  const [profissionais, setProfissionais] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [solicitandoVinculo, setSolicitandoVinculo] = useState({});
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                         user.nome.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesFilter = filter === 'todos' || 
-                        (filter === 'seguindo' && user.seguindo) || 
-                        (filter === 'nao-seguindo' && !user.seguindo);
+  useEffect(() => {
+    carregarProfissionais();
+  }, []);
+
+  const carregarProfissionais = async () => {
+    try {
+      setLoading(true);
+      const response = await api.get('/api/user/profissionais');
+      setProfissionais(response.data.profissionais || []);
+    } catch (error) {
+      console.error('Erro ao carregar profissionais:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const solicitarVinculo = async (profissional) => {
+    try {
+      setSolicitandoVinculo(prev => ({ ...prev, [profissional.id_usuario]: true }));
+      
+      const isNutricionista = profissional.nutricionista;
+      const endpoint = isNutricionista ? '/api/vinculos/nutricional' : '/api/vinculos/treino';
+      const idField = isNutricionista ? 'id_nutricionista' : 'id_personal';
+      const idValue = isNutricionista ? profissional.nutricionista.id_nutricionista : profissional.personalTrainer.id_personal;
+
+      await api.post(endpoint, {
+        [idField]: idValue,
+        observacoes: `Solicitação de vínculo com ${isNutricionista ? 'nutricionista' : 'personal trainer'}`
+      });
+
+      alert('Solicitação de vínculo enviada com sucesso!');
+      
+      // Atualizar o estado local para mostrar que o vínculo foi solicitado
+      setProfissionais(prev => prev.map(p => 
+        p.id_usuario === profissional.id_usuario 
+          ? { ...p, vinculo_solicitado: true }
+          : p
+      ));
+      
+    } catch (error) {
+      console.error('Erro ao solicitar vínculo:', error);
+      if (error.response?.status === 409) {
+        alert('Você já possui um vínculo com este profissional.');
+      } else {
+        alert('Erro ao solicitar vínculo. Tente novamente.');
+      }
+    } finally {
+      setSolicitandoVinculo(prev => ({ ...prev, [profissional.id_usuario]: false }));
+    }
+  };
+
+  const filteredProfissionais = profissionais.filter(profissional => {
+    const matchesSearch = profissional.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
+                         profissional.nome.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    let matchesFilter = true;
+    if (filter === 'nutricionistas') {
+      matchesFilter = profissional.nutricionista;
+    } else if (filter === 'treinadores') {
+      matchesFilter = profissional.personalTrainer;
+    }
+    
     return matchesSearch && matchesFilter;
   });
 
-  const handleSendRequest = (userId) => {
-    setUsers(users.map(user => 
-      user.id === userId ? {...user, seguindo: true} : user
-    ));
+  const getTipoProfissional = (profissional) => {
+    if (profissional.nutricionista) return 'Nutricionista';
+    if (profissional.personalTrainer) return 'Personal Trainer';
+    return 'Profissional';
   };
 
-  const handleRemoveFriend = (userId) => {
-    setUsers(users.map(user => 
-      user.id === userId ? {...user, seguindo: false} : user
-    ));
+  const getIconeProfissional = (profissional) => {
+    if (profissional.nutricionista) return <FiHeart size={16} />;
+    if (profissional.personalTrainer) return <FiUser size={16} />;
+    return <FiUser size={16} />;
   };
+
+  if (loading) {
+    return (
+      <Container>
+        <Header>
+          <NavBar 
+            title="THORC FIT"
+            showBack={true}
+            showMenu={false}
+            onBack={() => navigate('/home')}
+          />
+        </Header>
+        <div style={{ textAlign: 'center', padding: '2rem' }}>
+          <p>Carregando profissionais...</p>
+        </div>
+      </Container>
+    );
+  }
 
   return (
     <Container
@@ -90,11 +145,11 @@ export default function AmigosPage() {
     >
       <Header>
         <NavBar 
-        title="THORC FIT"
-        showBack={true}
-        showMenu={false}
-        onBack={() => navigate('/home')}
-      />
+          title="THORC FIT"
+          showBack={true}
+          showMenu={false}
+          onBack={() => navigate('/home')}
+        />
         <Logo 
           src="/assets/images/LogoAmigos.png" 
           alt="Logo Forte"
@@ -112,80 +167,118 @@ export default function AmigosPage() {
         <SearchContainer>
           <SearchInput
             type="text"
-            placeholder="🔍Buscar por e-mail..."
+            placeholder="🔍Buscar profissional por nome ou e-mail..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
           />
         </SearchContainer>
 
         <FilterGroup>
-          {['todos', 'seguindo', 'nao-seguindo'].map((filterType) => (
+          {[
+            { key: 'todos', label: 'Todos', icon: <FiFilter size={14} /> },
+            { key: 'nutricionistas', label: 'Nutricionistas', icon: <FiHeart size={14} /> },
+            { key: 'treinadores', label: 'Treinadores', icon: <FiUser size={14} /> }
+          ].map((filterType) => (
             <FilterButton
-              key={filterType}
-              active={filter === filterType}
-              onClick={() => setFilter(filterType)}
+              key={filterType.key}
+              active={filter === filterType.key}
+              onClick={() => setFilter(filterType.key)}
               variants={itemVariants}
             >
-              {filterType === 'todos' && <FiFilter size={14} />}
-              {filterType === 'seguindo' && <FiCheck size={14} />}
-              {filterType === 'nao-seguindo' && <FiPlus size={14} />}
-              {filterType === 'todos' && ' Todos'}
-              {filterType === 'seguindo' && ' Seguindo'}
-              {filterType === 'nao-seguindo' && ' Não seguindo'}
+              {filterType.icon}
+              {' ' + filterType.label}
             </FilterButton>
           ))}
         </FilterGroup>
+
+        {/* Botão para ver vínculos */}
+        <div style={{ textAlign: 'center', margin: '1rem 0' }}>
+          <motion.button
+            onClick={() => navigate('/vinculos-profissionais')}
+            style={{
+              background: '#007bff',
+              color: 'white',
+              border: 'none',
+              padding: '0.5rem 1rem',
+              borderRadius: '0.5rem',
+              cursor: 'pointer'
+            }}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            Ver Meus Vínculos Profissionais
+          </motion.button>
+        </div>
       </motion.div>
 
       <UserList>
         <AnimatePresence>
-          {filteredUsers.length === 0 ? (
+          {filteredProfissionais.length === 0 ? (
             <motion.p
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
+              style={{ textAlign: 'center', color: '#666' }}
             >
-              Nenhum usuário encontrado
+              Nenhum profissional encontrado
             </motion.p>
           ) : (
-            filteredUsers.map((user, index) => (
+            filteredProfissionais.map((profissional, index) => (
               <motion.div
-                key={user.id}
+                key={profissional.id_usuario}
                 variants={itemVariants}
                 transition={{ delay: index * 0.1 + 0.4 }}
               >
                 <UserCard>
-                  {user.seguindo && (
+                  {profissional.vinculo_solicitado && (
                     <CheckBadge>
                       <FiCheck size={16} />
                     </CheckBadge>
                   )}
                   
-                  <UserImage src={user.foto_perfil} alt={user.nome} />
+                  <UserImage src={profissional.foto_perfil || '/assets/images/default-avatar.png'} alt={profissional.nome} />
                   
                   <UserInfo>
-                    <h4>👤 {user.nome}</h4>
-                    <p>📧 {user.email}</p>
-                    <p>📱 {user.telefone}</p>
-                    <p>{user.tipo}</p>
+                    <h4>{getIconeProfissional(profissional)} {profissional.nome}</h4>
+                    <p>📧 {profissional.email}</p>
+                    {profissional.telefone && <p>📱 {profissional.telefone}</p>}
+                    <p><strong>{getTipoProfissional(profissional)}</strong></p>
+                    
+                    {/* Informações específicas do profissional */}
+                    {profissional.nutricionista?.especialidade && (
+                      <p><small>Especialidade: {profissional.nutricionista.especialidade}</small></p>
+                    )}
+                    {profissional.personalTrainer?.especialidade && (
+                      <p><small>Especialidade: {profissional.personalTrainer.especialidade}</small></p>
+                    )}
+                    
+                    {profissional.nutricionista?.preco_consulta && (
+                      <p><small>R$ {parseFloat(profissional.nutricionista.preco_consulta).toFixed(2)} / consulta</small></p>
+                    )}
+                    {profissional.personalTrainer?.preco_sessao && (
+                      <p><small>R$ {parseFloat(profissional.personalTrainer.preco_sessao).toFixed(2)} / sessão</small></p>
+                    )}
                   </UserInfo>
 
                   <ActionGroup>
-                    {user.seguindo ? (
-                      <DeleteButton
-                        onClick={() => handleRemoveFriend(user.id)}
-                        whileHover={{ scale: 1.05 }}
-                        whileTap={{ scale: 0.95 }}
-                      >
-                        <FiX /> Excluir
-                      </DeleteButton>
+                    {profissional.vinculo_solicitado ? (
+                      <CheckBadge style={{ position: 'relative', background: '#28a745' }}>
+                        <FiCheck /> Solicitado
+                      </CheckBadge>
                     ) : (
                       <AddButton
-                        onClick={() => handleSendRequest(user.id)}
+                        onClick={() => solicitarVinculo(profissional)}
+                        disabled={solicitandoVinculo[profissional.id_usuario]}
                         whileHover={{ scale: 1.05 }}
                         whileTap={{ scale: 0.95 }}
                       >
-                        <FiPlus /> Adicionar
+                        {solicitandoVinculo[profissional.id_usuario] ? (
+                          'Enviando...'
+                        ) : (
+                          <>
+                            <FiPlus /> Solicitar Vínculo
+                          </>
+                        )}
                       </AddButton>
                     )}
                   </ActionGroup>
@@ -198,3 +291,4 @@ export default function AmigosPage() {
     </Container>
   );
 }
+

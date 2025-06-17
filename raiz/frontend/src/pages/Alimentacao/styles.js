@@ -598,3 +598,13 @@ export const WaterAmountControl = styled.div`
     opacity: 0.8;
   }
 `;
+
+export const NutritionistInfo = styled.div`
+  margin: 16px 0;
+  padding: 12px;
+  background-color: #f0f4f8;
+  border-radius: 8px;
+  p {
+    margin: 4px 0;
+  }
+`;

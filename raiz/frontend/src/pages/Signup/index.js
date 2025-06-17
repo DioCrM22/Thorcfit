@@ -1,4 +1,3 @@
-// Mantém os imports exatamente como estão
 import React, { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useAuth } from "../../hooks/useAuth";
@@ -46,7 +45,7 @@ const Signup = () => {
     specialChar: false,
   });
 
-  const validateNameCharacters = (name) => /^[a-zA-ZÀ-ÿ\s-]+$/.test(name);
+  const validateNameCharacters = (name) => /^[a-zA-ZÀ-ÿ\s-]*$/.test(name);
 
   const formatName = (name) => {
     return name
@@ -60,7 +59,6 @@ const Signup = () => {
   const handleNomeChange = (e) => {
     const rawValue = e.target.value;
     if (!validateNameCharacters(rawValue)) {
-      notify("⚠️ O nome deve conter apenas letras, espaços e hífens", "warning");
       return;
     }
     setNome(formatName(rawValue));
@@ -120,10 +118,6 @@ const Signup = () => {
       notify("⚠️ Selecione o tipo de conta.", "error");
       return;
     }
-    if (showInfo) {
-      notify("ℹ️ Leia e feche as informações antes de continuar.", "warning");
-      return;
-    }
 
     try {
       const errorMessage = await signup(nome, email, senha, selectedRole);
@@ -131,7 +125,7 @@ const Signup = () => {
         notify(errorMessage, "error");
       } else {
         notify("🎉 Cadastro realizado com sucesso!", "success");
-        navigate("/dashboard");
+        navigate("/home");
       }
     } catch {
       notify("❌ Erro ao conectar com o servidor", "error");
@@ -273,8 +267,8 @@ const Signup = () => {
             <Button variant="orange" onClick={() => setStep(1)}>
               ⬅️ Voltar
             </Button>
-            </>
-          )}
+          </>
+        )}
 
         <FooterText>
           Já tem conta? <Link to="/signin">Faça Login</Link>
