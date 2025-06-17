@@ -157,62 +157,63 @@ module.exports = (sequelize) => {
   });
 
   const PlanoNutricional = sequelize.define("PlanoNutricional", {
-    id_plano: {
-      type: DataTypes.INTEGER,
-      primaryKey: true,
-      autoIncrement: true,
-    },
-    id_usuario: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-    },
-    id_nutricionista: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    nome: {
-      type: DataTypes.STRING(100),
-      allowNull: false,
-    },
-    descricao: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
-    calorias_diarias: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    proteinas_diarias: {
-      type: DataTypes.DECIMAL(8, 2),
-      allowNull: true,
-    },
-    carboidratos_diarias: {
-      type: DataTypes.DECIMAL(8, 2),
-      allowNull: true,
-    },
-    gorduras_diarias: {
-      type: DataTypes.DECIMAL(8, 2),
-      allowNull: true,
-    },
-    status: {
-      type: DataTypes.ENUM("ativo", "inativo", "concluido"),
-      allowNull: false,
-      defaultValue: "ativo",
-    },
-    data_inicio: {
-      type: DataTypes.DATEONLY,
-      allowNull: true,
-    },
-    data_fim: {
-      type: DataTypes.DATEONLY,
-      allowNull: true,
-    },
-  }, {
-    tableName: "plano_nutricional",
-    timestamps: true,
-    createdAt: "created_at",
-    updatedAt: "updated_at",
-  });
+  id_plano_nutricional: {
+    type: DataTypes.INTEGER,
+    primaryKey: true,
+    autoIncrement: true,
+  },
+  id_usuario: {
+    type: DataTypes.INTEGER,
+    allowNull: false,
+  },
+  id_nutricionista: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  nome: {
+    type: DataTypes.STRING(100),
+    allowNull: false,
+  },
+  descricao: {
+    type: DataTypes.TEXT,
+    allowNull: true,
+  },
+  calorias_diarias: {
+    type: DataTypes.INTEGER,
+    allowNull: true,
+  },
+  proteinas_diarias: {
+    type: DataTypes.DECIMAL(8, 2),
+    allowNull: true,
+  },
+  carboidratos_diarias: {
+    type: DataTypes.DECIMAL(8, 2),
+    allowNull: true,
+  },
+  gorduras_diarias: {
+    type: DataTypes.DECIMAL(8, 2),
+    allowNull: true,
+  },
+  status: {
+    type: DataTypes.ENUM("ativo", "inativo", "concluido"),
+    allowNull: false,
+    defaultValue: "ativo",
+  },
+  data_inicio: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+  },
+  data_fim: {
+    type: DataTypes.DATEONLY,
+    allowNull: true,
+  },
+}, {
+  tableName: "plano_nutricional",
+  timestamps: true,
+  createdAt: "created_at",
+  updatedAt: "updated_at",
+});
+
 
   return {
     Alimento,

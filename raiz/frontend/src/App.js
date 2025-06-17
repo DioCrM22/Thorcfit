@@ -13,7 +13,6 @@ import VerTreinos from './pages/VerTreinos';
 import Nutricionistas from './pages/Nutricionistas';
 import Treinadores from './pages/Treinadores';                  
 import Alimentacao from './pages/Alimentacao'; 
-import VinculosProfissionais from './pages/VinculosProfissionais';
 
 function App() {
   return (
@@ -28,7 +27,6 @@ function App() {
       
       {/* Rotas adaptadas para vínculos profissionais */}
       <Route path="/solicitar-companheiros" element={<SolicitarCompanheiros />} /> {/* Agora busca profissionais */}
-      <Route path="/vinculos-profissionais" element={<VinculosProfissionais />} />
       <Route path="/solicitar-alunos" element={<SolicitarAlunos />} />
       
       {/* Rotas para profissionais (interfaces de trabalho) */}

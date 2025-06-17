@@ -15,6 +15,7 @@ const treinoRoutes = require('./src/routes/treino');
 const metricasRoutes = require('./src/routes/metricas');
 const exerciciosRoutes = require('./src/routes/exercicios');
 const alimentosRoutes = require('./src/routes/alimentos');
+const vinculosRoutes = require('./src/routes/vinculos');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
@@ -71,6 +72,7 @@ app.use('/api/treino', treinoRoutes);
 app.use('/api/metricas', metricasRoutes);
 app.use('/api/exercicios', exerciciosRoutes);
 app.use('/api/alimentos', alimentosRoutes);
+app.use('/api/vinculos', vinculosRoutes);
 
 // Rota para informações da API
 app.get('/api', (req, res) => {
@@ -85,7 +87,8 @@ app.get('/api', (req, res) => {
       treino: '/api/treino',
       metricas: '/api/metricas',
       exercicios: '/api/exercicios',
-      alimentos: '/api/alimentos'
+      alimentos: '/api/alimentos',
+      vinculos: '/api/vinculos'
     },
     documentation: 'Consulte o README.md para documentação completa'
   });
@@ -165,4 +168,3 @@ if (require.main === module) {
 }
 
 module.exports = app;
-
