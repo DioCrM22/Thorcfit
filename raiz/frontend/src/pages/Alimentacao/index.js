@@ -61,109 +61,98 @@ const AlimentacaoPage = () => {
   ]);
 
   // Carregar dados do diário alimentar
-  useEffect(() => {
-    const loadDiarioAlimentar = async () => {
-      if (!user?.id_usuario) return;
+ useEffect(() => {
+  const loadDiarioAlimentar = async () => {
+    if (!user?.id_usuario) return;
 
-      try {
-        setLoading(true);
-        const dateString = currentDate.toISOString().split('T')[0];
-        
-        // Buscar diário alimentar do dia
-        const diarioResponse = await fetch(`http://localhost:3001/api/alimentacao/diario/${user.id_usuario}?data=${dateString}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
+    setLoading(true);
+    setError(null);
 
-        if (diarioResponse.ok) {
-          const diarioData = await diarioResponse.json();
-          setDiarioAlimentar(diarioData);
-          setWaterIntake(diarioData.agua_ml || 0);
-          
-          // Carregar refeições do diário
-          if (diarioData.id_registro) {
-            const refeicoesResponse = await fetch(`http://localhost:3001/api/alimentacao/refeicoes/${diarioData.id_registro}`, {
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
+    try {
+      const dateString = currentDate.toISOString().split('T')[0];
+
+      const diarioResponse = await fetch(`http://localhost:3001/api/alimentacao/diario?data=${dateString}`, {
+        headers: {
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (diarioResponse.ok) {
+        const diarioData = await diarioResponse.json();
+
+        if (diarioData?.diario) {
+          setDiarioAlimentar(diarioData.diario);
+          setWaterIntake(diarioData.diario.agua_ml || 0);
+
+          const refeicoes = diarioData.diario.refeicoes || [];
+
+          const mealsWithItems = meals.map(meal => ({
+            ...meal,
+            items: refeicoes
+              .filter(refeicao => refeicao.tipo_refeicao === meal.tipo)
+              .flatMap(refeicao => refeicao.alimentos || [])
+          }));
+
+          setMeals(mealsWithItems);
+
+          // Só carrega vínculo e plano se tem diário
+          const vinculoResponse = await fetch(`http://localhost:3001/api/vinculos/nutricionais?status=ativo&id_usuario=${user.id_usuario}`, {
+            headers: {
+              'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+          });
+
+          if (vinculoResponse.ok) {
+            const vinculoData = await vinculoResponse.json();
+            if (vinculoData.length > 0) {
+              setVinculoNutricional(vinculoData[0]);
+
+              const planoResponse = await fetch(`http://localhost:3001/api/alimentacao/plano/${user.id_usuario}`, {
+                headers: {
+                  'Authorization': `Bearer ${localStorage.getItem('token')}`
+                }
+              });
+
+              if (planoResponse.ok) {
+                const planoData = await planoResponse.json();
+                setPlanoNutricional(planoData);
+                if (planoData.agua_diaria) {
+                  setTotalWaterGoal(planoData.agua_diaria);
+                }
               }
-            });
-
-            if (refeicoesResponse.ok) {
-              const refeicoesData = await refeicoesResponse.json();
-              
-              // Organizar refeições por tipo
-              const mealsWithItems = meals.map(meal => ({
-                ...meal,
-                items: refeicoesData
-                  .filter(refeicao => refeicao.tipo_refeicao === meal.tipo)
-                  .flatMap(refeicao => refeicao.alimentos || [])
-              }));
-              
-              setMeals(mealsWithItems);
+            } else {
+              setVinculoNutricional(null);
+              setPlanoNutricional(null);
             }
           }
         } else {
-          // Se não existe diário para o dia, criar um novo
-          const newDiarioResponse = await fetch(`http://localhost:3001/api/alimentacao/diario`, {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${localStorage.getItem('token')}`
-            },
-            body: JSON.stringify({
-              id_usuario: user.id_usuario,
-              data: dateString,
-              agua_ml: 0
-            })
-          });
-
-          if (newDiarioResponse.ok) {
-            const newDiario = await newDiarioResponse.json();
-            setDiarioAlimentar(newDiario);
-            setWaterIntake(0);
-          }
+          // Sem diário: zera tudo
+          setDiarioAlimentar(null);
+          setMeals(prev => prev.map(m => ({ ...m, items: [] })));
+          setWaterIntake(0);
+          setVinculoNutricional(null);
+          setPlanoNutricional(null);
         }
-
-        // Buscar vínculo nutricional ativo
-        const vinculoResponse = await fetch(`http://localhost:3001/api/vinculos/nutricionais?status=ativo&id_usuario=${user.id_usuario}`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          }
-        });
-
-        if (vinculoResponse.ok) {
-          const vinculoData = await vinculoResponse.json();
-          if (vinculoData.length > 0) {
-            setVinculoNutricional(vinculoData[0]);
-            
-            // Buscar plano nutricional ativo
-            const planoResponse = await fetch(`http://localhost:3001/api/alimentacao/plano/${user.id_usuario}`, {
-              headers: {
-                'Authorization': `Bearer ${localStorage.getItem('token')}`
-              }
-            });
-
-            if (planoResponse.ok) {
-              const planoData = await planoResponse.json();
-              setPlanoNutricional(planoData);
-              if (planoData.calorias_diarias) {
-                setTotalWaterGoal(planoData.agua_diaria || 2500);
-              }
-            }
-          }
-        }
-
-      } catch (err) {
-        console.error('Erro ao carregar dados de alimentação:', err);
-        setError('Erro ao carregar dados de alimentação');
-      } finally {
-        setLoading(false);
+      } else if (diarioResponse.status === 404) {
+        // Sem diário: zera tudo
+        setDiarioAlimentar(null);
+        setMeals(prev => prev.map(m => ({ ...m, items: [] })));
+        setWaterIntake(0);
+        setVinculoNutricional(null);
+        setPlanoNutricional(null);
+      } else {
+        throw new Error('Erro ao carregar diário alimentar');
       }
-    };
+    } catch (err) {
+      console.error('Erro ao carregar dados de alimentação:', err);
+      setError('Erro ao carregar dados de alimentação');
+    } finally {
+      setLoading(false);
+    }
+  };
 
-    loadDiarioAlimentar();
-  }, [user, currentDate, meals]);
+  loadDiarioAlimentar();
+  }, [user, currentDate]);
 
   // Calcular nutrição diária
   const dailyNutrition = {
@@ -194,27 +183,32 @@ const AlimentacaoPage = () => {
   };
 
   const handleWaterChange = async (amount) => {
-    const newWaterIntake = Math.max(0, Math.min(totalWaterGoal, waterIntake + amount));
-    setWaterIntake(newWaterIntake);
+  const newWaterIntake = Math.max(0, Math.min(totalWaterGoal, waterIntake + amount));
+  setWaterIntake(newWaterIntake);
 
-    // Atualizar no backend
-    if (diarioAlimentar?.id_registro) {
-      try {
-        await fetch(`http://localhost:3001/api/alimentacao/diario/${diarioAlimentar.id_registro}`, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-          },
-          body: JSON.stringify({
-            agua_ml: newWaterIntake
-          })
-        });
-      } catch (err) {
-        console.error('Erro ao atualizar consumo de água:', err);
+  // Atualizar no backend
+  if (diarioAlimentar?.id_registro) {
+    try {
+      const response = await fetch(`http://localhost:3001/api/alimentacao/diario/${diarioAlimentar.id_registro}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify({
+          agua_ml: newWaterIntake
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Falha ao atualizar consumo de água:', await response.text());
       }
+
+    } catch (err) {
+      console.error('Erro ao atualizar consumo de água:', err);
     }
-  };
+  }
+};
 
   const handleSaveWaterGoal = async () => {
     setTotalWaterGoal(newGoal);
@@ -376,44 +370,45 @@ const AlimentacaoPage = () => {
 
   return (
     <>
-      <NavBar title="THORC FIT" showBack onBack={() => navigate('/home')} />
+       => navigate('/home')} />
 
-      <S.Container>
-        {/* Seletor de Data */}
-        <S.DaySelector>
-          <S.DayButton onClick={() => changeDate(-1)}>
-            <FiChevronLeft size={20} />
-          </S.DayButton>
-          
-          <FloatingNutriButton />
+  <S.Container>
+    {/* Seletor de Data */}
+    <S.DaySelector>
+      <S.DayButton onClick={() => changeDate(-1)}>
+        <FiChevronLeft size={20} />
+      </S.DayButton>
 
-          <S.CurrentDayContainer>
-            <S.CurrentDay>
-              {currentDate.toDateString() === new Date().toDateString() ? '🎯 Hoje' : 
-              currentDate.toDateString() === new Date(new Date().setDate(new Date().getDate() + 1)).toDateString() ? '⏭️ Amanhã' : 
-              formatDate(currentDate)}
-              
-              <S.CalendarButton onClick={toggleCalendar}>
-                <FiCalendar size={18} />
-              </S.CalendarButton>
-              
-              {showCalendar && (
-                <S.CalendarPopup>
-                  <Calendar 
-                    onChange={handleDateChange}
-                    value={currentDate}
-                    locale="pt-BR"
-                  />
-                </S.CalendarPopup>
-              )}
-            </S.CurrentDay>
-          </S.CurrentDayContainer>
+      <FloatingNutriButton />
 
-          <S.DayButton onClick={() => changeDate(1)}>
-            <FiChevronRight size={20} />
-          </S.DayButton>
-        </S.DaySelector>
+      <S.CurrentDayContainer>
+        <S.CurrentDay>
+          {currentDate.toDateString() === new Date().toDateString()
+            ? '🎯 Hoje'
+            : currentDate.toDateString() ===
+              new Date(new Date().setDate(new Date().getDate() + 1)).toDateString()
+            ? '⏭️ Amanhã'
+            : formatDate(currentDate)}
 
+          <S.CalendarButton onClick={toggleCalendar}>
+            <FiCalendar size={18} />
+          </S.CalendarButton>
+
+          {showCalendar && (
+            <S.CalendarPopup>
+              <Calendar onChange={handleDateChange} value={currentDate} locale="pt-BR" />
+            </S.CalendarPopup>
+          )}
+        </S.CurrentDay>
+      </S.CurrentDayContainer>
+
+      <S.DayButton onClick={() => changeDate(1)}>
+        <FiChevronRight size={20} />
+      </S.DayButton>
+    </S.DaySelector>
+
+    {diarioAlimentar ? (
+      <>
         {/* Resumo Nutricional */}
         <NutritionBars nutrition={dailyNutrition} />
 
@@ -427,10 +422,13 @@ const AlimentacaoPage = () => {
           {editWaterGoal && (
             <S.EditPopup>
               <p>
-                📢 {vinculoNutricional ? 
-                  <strong>Sua nutricionista</strong> : 
+                📢{' '}
+                {vinculoNutricional ? (
+                  <strong>Sua nutricionista</strong>
+                ) : (
                   <strong>Sistema</strong>
-                } recomenda o limite diário de água com base nos seus dados.
+                )}{' '}
+                recomenda o limite diário de água com base nos seus dados.
               </p>
               <label htmlFor="metaAgua">Nova meta (em ml):</label>
               <input
@@ -442,14 +440,12 @@ const AlimentacaoPage = () => {
                 onChange={(e) => setNewGoal(parseInt(e.target.value))}
               />
               <div>
-                <button onClick={handleSaveWaterGoal}>
-                  Salvar
-                </button>
+                <button onClick={handleSaveWaterGoal}>Salvar</button>
                 <button onClick={() => setEditWaterGoal(false)}>Cancelar</button>
               </div>
             </S.EditPopup>
           )}
-          
+
           <S.WaterContent>
             <S.WaterGlassContainer>
               {/* Garrafa de consumo */}
@@ -467,7 +463,7 @@ const AlimentacaoPage = () => {
                 <S.GlassBottom />
                 <S.WaterLabel>Seu consumo</S.WaterLabel>
               </S.WaterGlass>
-              
+
               {/* Garrafa de meta */}
               <S.WaterGlass>
                 <S.WaterDrop top="10px" left="40%" />
@@ -484,21 +480,21 @@ const AlimentacaoPage = () => {
                 <S.WaterLabel>Meta diária</S.WaterLabel>
               </S.WaterGlass>
             </S.WaterGlassContainer>
-            
+
             <S.WaterControls>
-              <S.WaterButton 
+              <S.WaterButton
                 onClick={() => handleWaterChange(-250)}
                 disabled={waterIntake <= 0}
                 aria-label="Remover água"
               >
                 <FiMinus />
               </S.WaterButton>
-              
+
               <S.WaterAmountControl>
                 <span>250ml</span>
               </S.WaterAmountControl>
-              
-              <S.WaterButton 
+
+              <S.WaterButton
                 onClick={() => handleWaterChange(250)}
                 disabled={waterIntake >= totalWaterGoal}
                 aria-label="Adicionar água"
@@ -510,10 +506,10 @@ const AlimentacaoPage = () => {
         </S.WaterTracker>
 
         {/* Refeições */}
-        {meals.map(meal => (
-          <MealCard 
-            key={meal.id} 
-            meal={meal} 
+        {meals.map((meal) => (
+          <MealCard
+            key={meal.id}
+            meal={meal}
             onAddFood={() => handleAddFood(meal.id)}
             onRemoveFood={handleRemoveFood}
           />
@@ -522,23 +518,26 @@ const AlimentacaoPage = () => {
         {/* Informação sobre vínculo nutricional */}
         {vinculoNutricional && (
           <S.NutritionistInfo>
-            <p>📋 Acompanhado por: <strong>{vinculoNutricional.nutricionista?.nome}</strong></p>
-            {planoNutricional && (
-              <p>🎯 Plano: {planoNutricional.objetivo}</p>
-            )}
+            <p>
+              📋 Acompanhado por: <strong>{vinculoNutricional.nutricionista?.nome}</strong>
+            </p>
+            {planoNutricional && <p>🎯 Plano: {planoNutricional.objetivo}</p>}
           </S.NutritionistInfo>
         )}
-      </S.Container>
+      </>
+    ) : (
+      <p style={{ textAlign: 'center', marginTop: '2rem', color: '#666' }}>
+        Nenhum diário alimentar encontrado para esta data.
+      </p>
+    )}
+  </S.Container>
 
-      {/* Popup para adicionar alimento */}
-      <AddAlimentoPopup
-        isOpen={showAddFood}
-        onClose={() => setShowAddFood(false)}
-        onSave={handleSaveFood}
-        mealId={currentMeal}
-      />
-    </>
-  );
-};
-
-export default AlimentacaoPage;
+  {/* Popup para adicionar alimento */}
+  <AddAlimentoPopup
+    isOpen={showAddFood}
+    onClose={() => setShowAddFood(false)}
+    onSave={handleSaveFood}
+    mealId={currentMeal}
+  />
+</>
+)}

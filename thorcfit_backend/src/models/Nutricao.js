@@ -36,10 +36,10 @@ module.exports = (sequelize) => {
       allowNull: true,
       comment: "Fibras em gramas por 100g",
     },
-    unidade_medida: {
+    porcao_padrao: {
       type: DataTypes.STRING(50),
       allowNull: true,
-      defaultValue: "g",
+      defaultValue: "100g",
     },
   }, {
     tableName: "alimento",
@@ -95,7 +95,7 @@ module.exports = (sequelize) => {
     tableName: "diario_alimentar",
     timestamps: true,
     createdAt: "created_at",
-    updatedAt: "updatedAt",
+    updatedAt: "updated_at",
     indexes: [
       {
         unique: true,

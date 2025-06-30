@@ -35,7 +35,9 @@ const Signup = () => {
   const [emailConf, setEmailConf] = useState("");
   const [senha, setSenha] = useState("");
   const [senhaConf, setSenhaConf] = useState("");
+  const [dataNascimento, setDataNascimento] = useState("");
   const [selectedRole, setSelectedRole] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const [passwordValidations, setPasswordValidations] = useState({
     length: false,
@@ -84,53 +86,73 @@ const Signup = () => {
 
   const validateEmail = (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 
-  const handleNextStep = () => {
-    if (!nome.trim() || nome.split(" ").length < 2) {
-      notify("👤 Informe seu nome completo.", "error");
-      return;
-    }
-    if (!validateEmail(email)) {
-      notify("📧 E-mail inválido.", "error");
-      return;
-    }
-    if (email !== emailConf) {
-      notify("📧 E-mails não coincidem.", "error");
-      return;
-    }
-    if (!validatePassword(senha)) {
-      notify("🔒 A senha não atende aos critérios.", "error");
-      return;
-    }
-    if (senha !== senhaConf) {
-      notify("🔒 As senhas não coincidem.", "error");
-      return;
-    }
-    setStep(2);
-  };
+const handleNextStep = () => {
+  if (!nome.trim() || nome.trim().split(/\s+/).length < 2) {
+    notify("👤 Informe seu nome completo.", "error");
+    return;
+  }
+  if (!validateEmail(email)) {
+    notify("📧 E-mail inválido.", "error");
+    return;
+  }
+  if (email !== emailConf) {
+    notify("📧 E-mails não coincidem.", "error");
+    return;
+  }
+  if (!dataNascimento) {
+    notify("📅 Informe sua data de nascimento.", "error");
+    return;
+  }
+  if (!validatePassword(senha)) {
+    notify("🔒 A senha não atende aos critérios.", "error");
+    return;
+  }
+  if (senha !== senhaConf) {
+    notify("🔒 As senhas não coincidem.", "error");
+    return;
+  }
+  setStep(2);
+};
 
-  const handleSelectRole = (role) => {
-    setSelectedRole(role);
-    setShowInfo(true);
-  };
+const tipoContaIds = {
+  "usuario": 1,
+  "nutricionista": 2,
+  "personal": 3,
+};
 
-  const handleSignup = async () => {
-    if (!selectedRole) {
-      notify("⚠️ Selecione o tipo de conta.", "error");
+
+const handleSelectRole = (role) => {
+  setSelectedRole(role);
+  setShowInfo(true);
+};
+
+const handleSignup = async () => {
+  if (!selectedRole) {
+    notify("⚠️ Selecione o tipo de conta.", "error");
+    return;
+  }
+
+  setLoading(true);
+
+  try {
+    const tipoContaId = tipoContaIds[selectedRole];
+    const result = await signup(nome, email, senha, dataNascimento, tipoContaId);
+
+    if (!result.success) {
+      notify(result.error, "error");
       return;
     }
 
-    try {
-      const errorMessage = await signup(nome, email, senha, selectedRole);
-      if (errorMessage) {
-        notify(errorMessage, "error");
-      } else {
-        notify("🎉 Cadastro realizado com sucesso!", "success");
-        navigate("/home");
-      }
-    } catch {
-      notify("❌ Erro ao conectar com o servidor", "error");
-    }
-  };
+    notify("🎉 Cadastro realizado com sucesso!", "success");
+
+    const redirectPath = result.redirectTo || `/app/home`;
+    navigate(redirectPath);
+  } catch (error) {
+    notify("❌ Erro durante o cadastro", "error");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <Container>
@@ -170,6 +192,16 @@ const Signup = () => {
                 emoji="📧"
                 value={emailConf}
                 onChange={(e) => setEmailConf(e.target.value.toLowerCase())}
+              />
+            </InputGroup>
+
+            <InputGroup>
+              <Input
+                type="date"
+                placeholder="Data de nascimento"
+                emoji="🎂"
+                value={dataNascimento}
+                onChange={(e) => setDataNascimento(e.target.value)}
               />
             </InputGroup>
 
@@ -261,8 +293,8 @@ const Signup = () => {
               </InfoTooltip>
             )}
 
-            <Button variant="green" onClick={handleSignup}>
-              🚀 Finalizar Cadastro
+            <Button variant="green" onClick={handleSignup} disabled={loading}>
+              {loading ? 'Enviando...' : '🚀 Finalizar Cadastro'}
             </Button>
             <Button variant="orange" onClick={() => setStep(1)}>
               ⬅️ Voltar

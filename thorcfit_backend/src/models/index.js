@@ -6,6 +6,8 @@ const defineProfissionais = require("./Profissionais");
 const defineNutricao = require("./Nutricao");
 const defineTreino = require("./Treino");
 const defineMetricasVinculos = require("./MetricasVinculos");
+const defineTipoConta = require("./TipoConta");
+
 
 // Definir os modelos passando a instância do Sequelize
 const Usuario = defineUsuario(sequelize);
@@ -13,6 +15,7 @@ const { Nutricionista, PersonalTrainer } = defineProfissionais(sequelize);
 const { Alimento, PlanoNutricional, DiarioAlimentar, Refeicao, AlimentoRefeicao } = defineNutricao(sequelize);
 const { Exercicio, PlanoTreino, ExerciciosDoTreino, HistoricoTreino } = defineTreino(sequelize);
 const { MetasUsuario, MetricasUsuario, VinculoNutricional, VinculoTreino } = defineMetricasVinculos(sequelize);
+const TipoConta = defineTipoConta(sequelize);
 
 // Definir associações
 // Associações de Usuario
@@ -42,6 +45,9 @@ VinculoNutricional.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' 
 
 Usuario.hasMany(VinculoTreino, { foreignKey: 'id_usuario', as: 'vinculosTreino' });
 VinculoTreino.belongsTo(Usuario, { foreignKey: 'id_usuario', as: 'usuario' });
+
+Usuario.belongsTo(TipoConta, { foreignKey: 'id_tipo_conta', as: 'tipo_conta' });
+TipoConta.hasMany(Usuario, { foreignKey: 'id_tipo_conta', as: 'usuario' });
 
 // Associações de Nutricionista
 Nutricionista.hasMany(PlanoNutricional, { foreignKey: 'id_nutricionista', as: 'planosNutricionaisCriados' });
@@ -96,4 +102,5 @@ module.exports = {
   MetricasUsuario,
   VinculoNutricional,
   VinculoTreino,
+  TipoConta
 };

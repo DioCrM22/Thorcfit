@@ -1,5 +1,7 @@
 const { body, validationResult } = require('express-validator');
-const { Usuario, Nutricionista, PersonalTrainer } = require('../models');
+const { Usuario, Nutricionista, PersonalTrainer, TipoConta  } = require('../models');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 
 class UserController {
   // Validações para atualização de perfil
@@ -23,96 +25,110 @@ class UserController {
       .isISO8601()
       .withMessage('Data de nascimento inválida')
   ];
+  //cadastro
+  static validateSignup = [
+  body('nome')
+    .trim()
+    .isLength({ min: 2, max: 100 })
+    .withMessage('Nome deve ter entre 2 e 100 caracteres'),
+  body('email')
+    .isEmail()
+    .normalizeEmail()
+    .withMessage('E-mail inválido'),
+  body('senha')
+    .isLength({ min: 8 })
+    .withMessage('Senha deve ter no mínimo 8 caracteres')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+])[A-Za-z\d!@#$%^&*()_+]{8,}$/)
+    .withMessage('Senha deve conter maiúscula, minúscula, número e caractere especial'),
+  body('tipo_conta')
+    .isIn(['usuario', 'nutricionista', 'personal'])
+    .withMessage('Tipo de conta inválido'),
+  body('data_nascimento')
+    .isISO8601()
+    .withMessage('Data de nascimento inválida')
+];
 
-  // Atualizar perfil do usuário
-  static async updateProfile(req, res) {
-    try {
-      const errors = validationResult(req);
-      if (!errors.isEmpty()) {
-        return res.status(400).json({
-          error: 'Dados inválidos',
-          details: errors.array()
-        });
-      }
+static async signup(req, res) {
+  const tipoContaMap = {
+    "usuario": 1,
+    "nutricionista": 2,
+    "personal": 3
+  };
 
-      const { 
-        nome, 
-        telefone, 
-        genero, 
-        data_nascimento,
-        foto_perfil,
-        bio,
-        especialidades,
-        registro_profissional,
-        preco_consulta,
-        preco_sessao
-      } = req.body;
+  let { nome, email, senha, tipo_conta, data_nascimento } = req.body;
 
-      const usuario = await Usuario.findByPk(req.userId, {
-        include: [
-          { model: Nutricionista, as: 'nutricionista' },
-          { model: PersonalTrainer, as: 'personalTrainer' }
-        ]
-      });
+  console.log('Recebido no signup:', { nome, email, senha: senha ? '***' : null, tipo_conta, data_nascimento });
 
-      if (!usuario) {
-        return res.status(404).json({
-          error: 'Usuário não encontrado'
-        });
-      }
-
-      // Atualizar dados básicos do usuário
-      const dadosAtualizacao = {};
-      if (nome !== undefined) dadosAtualizacao.nome = nome;
-      if (telefone !== undefined) dadosAtualizacao.telefone = telefone;
-      if (genero !== undefined) dadosAtualizacao.genero = genero;
-      if (data_nascimento !== undefined) dadosAtualizacao.data_nascimento = data_nascimento;
-      if (foto_perfil !== undefined) dadosAtualizacao.foto_perfil = foto_perfil;
-
-      await usuario.update(dadosAtualizacao);
-
-      // Atualizar dados profissionais se aplicável
-      if (usuario.nutricionista && (bio !== undefined || especialidades !== undefined || registro_profissional !== undefined || preco_consulta !== undefined)) {
-        const dadosNutricionista = {};
-        if (bio !== undefined) dadosNutricionista.bio = bio;
-        if (especialidades !== undefined) dadosNutricionista.especialidades = especialidades;
-        if (registro_profissional !== undefined) dadosNutricionista.registro_nutricionista = registro_profissional;
-        if (preco_consulta !== undefined) dadosNutricionista.preco_consulta = preco_consulta;
-
-        await usuario.nutricionista.update(dadosNutricionista);
-      }
-
-      if (usuario.personalTrainer && (bio !== undefined || especialidades !== undefined || registro_profissional !== undefined || preco_sessao !== undefined)) {
-        const dadosPersonal = {};
-        if (bio !== undefined) dadosPersonal.bio = bio;
-        if (especialidades !== undefined) dadosPersonal.especialidades = especialidades;
-        if (registro_profissional !== undefined) dadosPersonal.registro_personal = registro_profissional;
-        if (preco_sessao !== undefined) dadosPersonal.preco_sessao = preco_sessao;
-
-        await usuario.personalTrainer.update(dadosPersonal);
-      }
-
-      // Buscar usuário atualizado
-      const usuarioAtualizado = await Usuario.findByPk(req.userId, {
-        attributes: { exclude: ['senha_hash'] },
-        include: [
-          { model: Nutricionista, as: 'nutricionista' },
-          { model: PersonalTrainer, as: 'personalTrainer' }
-        ]
-      });
-
-      res.json({
-        message: 'Perfil atualizado com sucesso',
-        usuarioAtualizado: usuarioAtualizado.toJSON()
-      });
-
-    } catch (error) {
-      console.error('Erro ao atualizar perfil:', error);
-      res.status(500).json({
-        error: 'Erro interno do servidor'
-      });
-    }
+  const tipo_conta_num = tipoContaMap[tipo_conta];
+  if (!tipo_conta_num) {
+    console.warn('Tipo de conta inválido:', tipo_conta);
+    return res.status(400).json({
+      error: 'Tipo de conta inválido',
+      tipos_validos: Object.keys(tipoContaMap)
+    });
   }
+  tipo_conta = tipo_conta_num;
+
+  try {
+    const senha_hash = await bcrypt.hash(senha, 12);
+    console.log('Senha hash gerada');
+
+    console.log("Dados para criar usuário:", {
+      nome,
+      email,
+      senha_hash,
+      data_nascimento,
+      id_tipo_conta: tipo_conta
+    });
+
+    const usuario = await Usuario.create({
+      nome,
+      email,
+      senha_hash,
+      data_nascimento,
+      id_tipo_conta: "nutricionista"
+    });
+    
+    console.log('Usuário criado no banco:', { id: usuario.id_usuario, nome: usuario.nome });
+
+    const TIPOS_CONTA_NOMES = {
+      1: 'usuario',
+      2: 'nutricionista',
+      3: 'personal'
+    };
+
+    const tipoContaNome = TIPOS_CONTA_NOMES[tipo_conta];
+    console.log('Tipo conta nome mapeado:', tipoContaNome);
+
+    // Gerar token JWT
+    const token = jwt.sign({
+      id: usuario.id_usuario,
+      email: usuario.email,
+      tipo_conta: tipoContaNome
+    }, process.env.JWT_SECRET, { expiresIn: '7d' });
+
+    console.log('Token JWT gerado');
+
+    return res.json({
+      message: "Usuário criado com sucesso",
+      token,
+      user: {
+        id_usuario: usuario.id_usuario,
+        nome: usuario.nome,
+        email: usuario.email,
+        id_tipo_conta: "nutricionista"
+      },
+      redirectTo: tipoContaNome === 'usuario' ? '/home' : `/${tipoContaNome}s/dashboard`
+    });
+
+  } catch (error) {
+    console.error('Erro no cadastro:', error);
+    return res.status(500).json({
+      error: 'Erro no cadastro',
+      details: process.env.NODE_ENV === 'development' ? error.message : null
+    });
+  }
+}
 
   // Obter perfil de outro usuário (público)
   static async getPublicProfile(req, res) {

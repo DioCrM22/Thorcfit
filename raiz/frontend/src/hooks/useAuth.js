@@ -96,36 +96,44 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const signup = async (nome, email, senha, tipoUsuario = 'usuario') => {
-    setLoading(true);
-    try {
-      const { data } = await axios.post('/auth/signup', { 
-        nome, 
-        email, 
-        senha,
-        tipo_usuario: tipoUsuario
-      }, {
-        headers: {
-          'Content-Type': 'application/json'
-        }
-      });
-      
-      if (data.error) {
-        throw new Error(data.error);
-      }
-      
-      if (data.token && data.usuario) {
-        handleAuthSuccess(data.token, data.usuario);
-        return { success: true };
-      } else {
-        throw new Error('Resposta inválida do servidor');
-      }
-    } catch (error) {
-      setLoading(false);
-      console.error('Erro no cadastro:', error);
-      return { success: false, error: error.response?.data?.error || error.message || 'Erro ao cadastrar' };
+  // Em useAuth.js
+const signup = async (nome, email, senha, dataNascimento, tipo_conta) => {
+  setLoading(true);
+
+console.log(nome, email, senha, dataNascimento, tipo_conta)
+
+  try {
+    const { data } = await axios.post('/auth/signup', {
+      nome,
+      email,
+      senha,
+      tipo_conta : "nutricionista",
+      data_nascimento: dataNascimento
+    });
+
+    if (!data || data.error) {
+      throw new Error(data.error || 'Erro no cadastro');
     }
-  };
+
+    if (data.token) {
+      localStorage.setItem('authToken', data.token);
+      console.log(data.token)
+    }
+
+    return {
+      success: true,
+      redirectTo: data.redirectTo,
+      user: data.user
+    };
+  } catch (error) {
+    return {
+      success: false,
+      error: error.response?.data?.error || error.message
+    };
+  } finally {
+    setLoading(false);
+  }
+};
 
   const signin = async (email, senha) => {
     setLoading(true);

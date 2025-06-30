@@ -17,7 +17,7 @@ class AuthController {
     body('senha')
       .isLength({ min: 6 })
       .withMessage('Senha deve ter pelo menos 6 caracteres'),
-    body('tipo_usuario')
+    body('tipo_conta')
       .optional()
       .isIn(['usuario', 'nutricionista', 'personal'])
       .withMessage('Tipo de usuário inválido')
@@ -52,7 +52,7 @@ class AuthController {
         data_nascimento, 
         genero, 
         telefone, 
-        tipo_usuario = 'usuario',
+        tipo_conta = 'nutricionista',
         registro_profissional,
         bio,
         especialidades
@@ -78,18 +78,19 @@ class AuthController {
         data_nascimento,
         genero,
         telefone,
-        metodo_login: 'email'
+        metodo_login: 'email',
+        id_tipo_conta
       });
 
       // Criar perfil profissional se necessário
-      if (tipo_usuario === 'nutricionista') {
+      if (id_tipo_conta === 'nutricionista') {
         await Nutricionista.create({
           id_usuario: novoUsuario.id_usuario,
           registro_nutricionista: registro_profissional,
           bio,
           especialidades
         });
-      } else if (tipo_usuario === 'personal') {
+      } else if (id_tipo_conta === 'personal') {
         await PersonalTrainer.create({
           id_usuario: novoUsuario.id_usuario,
           registro_personal: registro_profissional,
@@ -103,7 +104,7 @@ class AuthController {
         { 
           id: novoUsuario.id_usuario,
           email: novoUsuario.email,
-          tipo: tipo_usuario
+          tipo: id_tipo_conta
         },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
@@ -117,7 +118,7 @@ class AuthController {
         token,
         usuario: {
           ...usuarioResposta,
-          tipo_usuario
+          id_tipo_conta
         }
       });
 
@@ -166,11 +167,11 @@ class AuthController {
       }
 
       // Determinar tipo de usuário
-      let tipo_usuario = 'usuario';
+      let id_tipo_conta = 1;
       if (usuario.nutricionista) {
-        tipo_usuario = 'nutricionista';
+        id_tipo_conta = 2;
       } else if (usuario.personalTrainer) {
-        tipo_usuario = 'personal';
+        id_tipo_conta = 3;
       }
 
       // Gerar token JWT
@@ -178,7 +179,7 @@ class AuthController {
         { 
           id: usuario.id_usuario,
           email: usuario.email,
-          tipo: tipo_usuario
+          tipo: id_tipo_conta
         },
         process.env.JWT_SECRET,
         { expiresIn: process.env.JWT_EXPIRES_IN || '7d' }
@@ -193,7 +194,7 @@ class AuthController {
         token,
         usuario: {
           ...usuarioResposta,
-          tipo_usuario
+          id_tipo_conta
         }
       });
 
@@ -223,18 +224,18 @@ class AuthController {
       }
 
       // Determinar tipo de usuário
-      let tipo_usuario = 'usuario';
+      let id_tipo_conta = 1;
       if (usuario.nutricionista) {
-        tipo_usuario = 'nutricionista';
+        id_tipo_conta = 2;
       } else if (usuario.personalTrainer) {
-        tipo_usuario = 'personal';
+        id_tipo_conta = 3;
       }
 
       res.json({
         success: true,
         usuario: {
           ...usuario.toJSON(),
-          tipo_usuario
+          id_tipo_conta
         }
       });
 

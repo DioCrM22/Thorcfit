@@ -14,7 +14,8 @@ const {
   MetasUsuario,
   VinculoNutricao,
   VinculoTreino,
-  HistoricoTreino
+  HistoricoTreino,
+  TipoConta
 } = require('../src/models');
 
 const bcrypt = require('bcryptjs');
@@ -24,12 +25,18 @@ async function seedDatabase() {
     console.log('🌱 Iniciando seed do banco de dados...');
 
     // Sincronizar modelos
-    await sequelize.sync({ force: true });
+    await sequelize.sync();
     console.log('✅ Modelos sincronizados');
 
     // 1. Criar usuários de teste
     console.log('👥 Criando usuários...');
     const senhaHash = await bcrypt.hash('123456', 12);
+
+    const tiposConta = await TipoConta.bulkCreate([
+      { id_tipo_conta: 1, nome: 'usuario' },
+      { id_tipo_conta: 2, nome: 'nutricionista' },
+      { id_tipo_conta: 3, nome: 'personal' }
+    ]);
 
     const usuarios = await Usuario.bulkCreate([
       {
@@ -40,7 +47,8 @@ async function seedDatabase() {
         genero: 'masculino',
         telefone: '(11) 99999-1111',
         metodo_login: 'email',
-        ativo: true
+        ativo: true,
+        id_tipo_conta: 1
       },
       {
         nome: 'Maria Santos',
@@ -50,7 +58,8 @@ async function seedDatabase() {
         genero: 'feminino',
         telefone: '(11) 99999-2222',
         metodo_login: 'email',
-        ativo: true
+        ativo: true,
+        id_tipo_conta: 1
       },
       {
         nome: 'Dr. Carlos Nutricionista',
@@ -60,7 +69,8 @@ async function seedDatabase() {
         genero: 'masculino',
         telefone: '(11) 99999-3333',
         metodo_login: 'email',
-        ativo: true
+        ativo: true,
+        id_tipo_conta: 2
       },
       {
         nome: 'Ana Personal Trainer',
@@ -70,7 +80,8 @@ async function seedDatabase() {
         genero: 'feminino',
         telefone: '(11) 99999-4444',
         metodo_login: 'email',
-        ativo: true
+        ativo: true,
+        id_tipo_conta: 3
       },
       {
         nome: 'Pedro Oliveira',
@@ -80,7 +91,8 @@ async function seedDatabase() {
         genero: 'masculino',
         telefone: '(11) 99999-5555',
         metodo_login: 'email',
-        ativo: true
+        ativo: true,
+        id_tipo_conta: 1
       }
     ]);
 
@@ -470,6 +482,8 @@ if (require.main === module) {
       process.exit(1);
     });
 }
+
+
 
 module.exports = seedDatabase;
 

@@ -12,6 +12,14 @@ router.get('/diario',
   AlimentacaoController.getDiario
 );
 
+router.get('/diario/:data', 
+  AlimentacaoController.getDiario
+);
+
+router.put('/diario/:id_registro', 
+  AlimentacaoController.updateDiario
+);
+
 // Adicionar nova refeição
 router.post('/refeicao',
   AlimentacaoController.validateRefeicao,

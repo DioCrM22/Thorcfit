@@ -1,3 +1,4 @@
+// src/pages/Alimentacao/CadastroAlimentoPopup/index.js
 import React, { useState } from 'react';
 import * as S from './styles';
 
@@ -8,8 +9,12 @@ const CadastroAlimentoPopup = ({ isOpen, onClose, onSave }) => {
     proteinas: '',
     carboidratos: '',
     gorduras: '',
+    fibras: '',
     porcao_padrao: '',
   });
+
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState('');
 
   const fieldConfigs = {
     nome: { label: 'Nome do Alimento', type: 'text', unit: '', placeholder: 'Ex.: Arroz branco' },
@@ -17,6 +22,7 @@ const CadastroAlimentoPopup = ({ isOpen, onClose, onSave }) => {
     proteinas: { label: 'Proteínas', type: 'number', unit: 'g', placeholder: 'Ex.: 2.5' },
     carboidratos: { label: 'Carboidratos', type: 'number', unit: 'g', placeholder: 'Ex.: 28' },
     gorduras: { label: 'Gorduras', type: 'number', unit: 'g', placeholder: 'Ex.: 0.3' },
+    fibras: { label: 'Fibras', type: 'number', unit: 'g', placeholder: 'Ex.: 1.5' },
     porcao_padrao: { label: 'Porção Padrão', type: 'text', unit: '', placeholder: 'Ex.: 100g' },
   };
 
@@ -24,10 +30,36 @@ const CadastroAlimentoPopup = ({ isOpen, onClose, onSave }) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    onSave(form);
-    onClose();
+    setLoading(true);
+    setErrorMsg('');
+
+    try {
+      const response = await fetch('http://localhost:3001/api/alimentacao/alimentos', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        },
+        body: JSON.stringify(form)
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        onSave(data.alimento);
+        onClose();
+      } else {
+        setErrorMsg(data.error || 'Erro ao cadastrar alimento');
+      }
+
+    } catch (err) {
+      console.error('Erro ao cadastrar alimento:', err);
+      setErrorMsg('Erro de conexão com o servidor');
+    } finally {
+      setLoading(false);
+    }
   };
 
   if (!isOpen) return null;
@@ -56,18 +88,22 @@ const CadastroAlimentoPopup = ({ isOpen, onClose, onSave }) => {
                     value={form[field]}
                     onChange={handleChange}
                     placeholder={config.placeholder}
+                    step="any"
+                    required={['nome', 'calorias'].includes(field)}
                   />
                   {config.unit && <S.Unit>{config.unit}</S.Unit>}
                 </S.InputWrapper>
               </S.InputGroup>
             ))}
 
+            {errorMsg && <S.ErrorMessage>{errorMsg}</S.ErrorMessage>}
+
             <S.ButtonContainer>
-              <S.SecondaryButton type="button" onClick={onClose}>
+              <S.SecondaryButton type="button" onClick={onClose} disabled={loading}>
                 Cancelar
               </S.SecondaryButton>
-              <S.PrimaryButton type="submit">
-                Salvar
+              <S.PrimaryButton type="submit" disabled={loading}>
+                {loading ? 'Salvando...' : 'Salvar'}
               </S.PrimaryButton>
             </S.ButtonContainer>
           </S.Form>

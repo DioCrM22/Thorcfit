@@ -33,14 +33,6 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
           setFilteredAlimentos(alimentosData);
         } else {
           console.error('Erro ao carregar alimentos');
-          // Fallback para dados mock se a API falhar
-          const mockAlimentos = [
-            { id_alimento: 1, nome: 'Ovo', calorias: 70, proteinas: 6, carboidratos: 0.6, gorduras: 5, porcao_padrao: 'unidade' },
-            { id_alimento: 2, nome: 'Arroz Integral', calorias: 110, proteinas: 2.6, carboidratos: 22, gorduras: 0.9, porcao_padrao: 'g' },
-            { id_alimento: 3, nome: 'Frango Grelhado', calorias: 165, proteinas: 31, carboidratos: 0, gorduras: 3.6, porcao_padrao: 'g' },
-            { id_alimento: 4, nome: 'Banana', calorias: 89, proteinas: 1.1, carboidratos: 23, gorduras: 0.3, porcao_padrao: 'unidade' },
-            { id_alimento: 5, nome: 'Aveia', calorias: 389, proteinas: 16.9, carboidratos: 66.3, gorduras: 6.9, porcao_padrao: 'g' }
-          ];
           setAlimentos(mockAlimentos);
           setFilteredAlimentos(mockAlimentos);
         }
@@ -73,7 +65,7 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
     const alimentoSelecionado = alimentos.find(a => a.id_alimento === parseInt(selectedAlimento));
     
     // Calcular valores nutricionais baseados na quantidade
-    const fatorMultiplicacao = parseFloat(quantidade) / 100; // Assumindo valores por 100g
+    const fatorMultiplicacao = porcao === 'unidade' ? 1 : (parseFloat(quantidade) / 100);// Assumindo valores por 100g
     
     const newFood = {
       id_alimento: alimentoSelecionado.id_alimento,
@@ -101,11 +93,17 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
   };
 
   const handleAlimentoCadastrado = (newAlimento) => {
+    if (!newAlimento || !newAlimento.id_alimento) {
+      console.error('Alimento salvo sem ID:', newAlimento);
+      return;
+    }
+
     setShowCadastro(false);
     setAlimentos(prev => [...prev, newAlimento]);
     setFilteredAlimentos(prev => [...prev, newAlimento]);
     setSelectedAlimento(newAlimento.id_alimento.toString());
   };
+
 
   const handleAlimentoSelect = (alimentoId) => {
     setSelectedAlimento(alimentoId);
@@ -134,21 +132,6 @@ const AddAlimentoPopup = ({ isOpen, onClose, onSave, mealId }) => {
           
           <S.Form onSubmit={handleSubmit}>
             <div style={{ maxHeight: 'calc(60vh - 180px)', overflowY: 'auto', paddingRight: '8px' }}>
-              
-              {/* Campo de busca */}
-              <S.InputContainer>
-                <S.Label>Buscar Alimento</S.Label>
-                <S.InputWrapper>
-                  <FiSearch style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)', color: '#666' }} />
-                  <S.Input
-                    type="text"
-                    placeholder="Digite o nome do alimento..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    style={{ paddingLeft: '40px' }}
-                  />
-                </S.InputWrapper>
-              </S.InputContainer>
 
               <S.InputContainer>
                 <S.Label>Alimento</S.Label>
